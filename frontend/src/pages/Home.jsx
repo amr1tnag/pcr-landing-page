@@ -226,55 +226,68 @@ function Events() {
   )
 }
 
-/* 7. Crew: who does the work, and where a new member fits. */
+/* 7. Crew: the team photo, then where a new member fits and who runs it. */
 function Crew() {
   return (
     <section id="team" className="scroll-mt-20 bg-coal py-24 md:py-32">
-      <div className="shell grid gap-16 md:grid-cols-12 md:gap-10">
-        <Reveal className="md:col-span-5">
+      <div className="shell">
+        <Reveal>
           <h2 className="display text-5xl sm:text-7xl">
             Shot by <span className="text-flame">students</span>
           </h2>
-          <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-bone/80">
+          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-bone/80">
             No professionals and no hired crew. Just members who learned on the job, and seniors who teach the next
             batch the same way.
           </p>
-
-          <h3 className="mt-12 text-base font-semibold text-bone">Where you fit in</h3>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {roles.map((r) => (
-              <li key={r} className="border border-bone/20 px-4 py-2 text-sm text-bone/85">
-                {r}
-              </li>
-            ))}
-            <li className="bg-flame px-4 py-2 text-sm font-semibold text-ink">Anyone else: we train you</li>
-          </ul>
         </Reveal>
 
-        <Reveal delay={120} className="md:col-span-6 md:col-start-7">
-          <h3 className="text-base font-semibold text-bone">Who runs it</h3>
-          <div className="mt-4 space-y-8">
-            {team.map((g) => (
-              <div key={g.group} className="border-t border-bone/10 pt-5">
-                <p className="text-sm text-flame">{g.group}</p>
-                <ul className="mt-3 grid gap-x-8 gap-y-3 sm:grid-cols-2">
-                  {g.people.map((p) => (
-                    <li key={p.role}>
-                      {p.name ? (
-                        <>
-                          <span className="block text-lg font-medium text-bone">{p.name}</span>
-                          <span className="text-sm text-ash">{p.role}</span>
-                        </>
-                      ) : (
-                        <span className="block text-lg font-medium text-bone">{p.role}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+        <Reveal delay={80} className="mt-12">
+          <Frame
+            src="/img/team.jpg"
+            alt="The PhotoCircle RAIT team, grinning on the steps outside the institute"
+            className="aspect-[4/3] sm:aspect-[16/9]"
+            imgClassName="object-[50%_40%]"
+          />
         </Reveal>
+
+        <div className="mt-14 grid gap-14 md:grid-cols-12 md:gap-10">
+          <Reveal className="md:col-span-5">
+            <h3 className="text-base font-semibold text-bone">Where you fit in</h3>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {roles.map((r) => (
+                <li key={r} className="border border-bone/20 px-4 py-2 text-sm text-bone/85">
+                  {r}
+                </li>
+              ))}
+              <li className="bg-flame px-4 py-2 text-sm font-semibold text-ink">Anyone else: we train you</li>
+            </ul>
+          </Reveal>
+
+          <Reveal delay={120} className="md:col-span-6 md:col-start-7">
+            <h3 className="text-base font-semibold text-bone">Who runs it</h3>
+            <div className="mt-4 space-y-8">
+              {team.map((g) => (
+                <div key={g.group} className="border-t border-bone/10 pt-5">
+                  <p className="text-sm text-flame">{g.group}</p>
+                  <ul className="mt-3 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                    {g.people.map((p) => (
+                      <li key={p.role}>
+                        {p.name ? (
+                          <>
+                            <span className="block text-lg font-medium text-bone">{p.name}</span>
+                            <span className="text-sm text-ash">{p.role}</span>
+                          </>
+                        ) : (
+                          <span className="block text-lg font-medium text-bone">{p.role}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   )
