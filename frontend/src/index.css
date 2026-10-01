@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink text-white antialiased;
+}
+
+::selection {
+  background: #ff3b14;
+  color: #000;
+}
+
+/* Thin custom scrollbar, photography-dark */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #262626; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #ff3b14; }
+
+@layer components {
+  .eyebrow {
+    @apply font-cond text-flame tracking-[0.35em] uppercase text-xs sm:text-sm;
+  }
+  .display {
+    @apply font-display uppercase leading-[0.86] tracking-[-0.02em];
+  }
+  .shell {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .rule {
+    @apply border-t border-white/10;
+  }
+}
+
+/* Film-grain overlay used on hero */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}

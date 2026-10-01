@@ -1,0 +1,9 @@
+services:
+  pcr:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Drop event folders into ./data/photos, then run the indexer (see README).
+      - ./data:/data
+    restart: unless-stopped
