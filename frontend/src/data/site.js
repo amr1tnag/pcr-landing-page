@@ -1,19 +1,20 @@
-// Single source of truth for all landing-page copy.
-// Swap image paths for real files dropped into frontend/public/img/.
+// Single source of truth for all site copy. Lines marked TODO need real details
+// from the club. Images live in frontend/public/img/.
 
 export const club = {
   name: 'PhotoCircle',
   campus: 'RAIT',
-  tagline: 'Capturing moments, building community',
+  tagline: 'Capturing moments, building community.',
   blurb:
-    'The official media team of Ramrao Adik Institute of Technology. We shoot, we edit, we deliver — and most of us walked in knowing nothing about a camera.',
+    'PhotoCircle RAIT is the media team behind the campus. Most of us walked in knowing nothing about a camera.',
   hashtag: '#WeThePCR',
   instagram: 'https://instagram.com/photocircle_rait',
   handle: '@photocircle_rait',
-  email: 'photocircle@rait.ac.in',
-  location: 'Dr. D. Y. Patil Campus, Nerul, Navi Mumbai',
+  email: 'photocircle@rait.ac.in', // TODO: confirm the club's real address
+  location: 'Ramrao Adik Institute of Technology, Nerul, Navi Mumbai',
 }
 
+// Labels and anchors are stable (nav, SEO, muscle memory). Change with care.
 export const nav = [
   { label: 'Home', href: '/#top' },
   { label: 'Gallery', href: '/gallery' },
@@ -22,89 +23,68 @@ export const nav = [
   { label: 'Contact', href: '/#contact' },
 ]
 
-export const stats = [
-  { value: '40+', label: 'Events covered a year' },
-  { value: '24h', label: 'Shot today, posted today' },
-  { value: '60+', label: 'Active members' },
-  { value: '0', label: 'Fees to join' },
-]
+// The one primary call to action, used with this exact label everywhere.
+export const primaryCta = { label: 'Find your photos', href: '/gallery' }
+
+// What the club covers, shown once in the marquee.
+export const coverage = ['Horizon', 'DYT20', 'Ganpati Utsav', 'RAIT Marathon', 'Felicitations', 'Cultural nights', 'Sports', 'Fests']
 
 export const pillars = [
-  {
-    title: 'Learn',
-    body: 'Photography and editing taught by seniors, on real shoots — not slide decks.',
-  },
-  {
-    title: 'Build',
-    body: 'A portfolio of real events by the end of your first year, with your name on it.',
-  },
-  {
-    title: 'Belong',
-    body: 'A crew that is backstage at every event on campus, pass around their neck.',
-  },
+  { title: 'Learn', body: 'Photography and editing taught by seniors, on real shoots.' },
+  { title: 'Build', body: 'A portfolio of real events by the end of your first year.' },
+  { title: 'Belong', body: 'A crew that is backstage at every event on campus.' },
 ]
 
-export const roles = [
-  'Photographers',
-  'Videographers',
-  'Photo editors',
-  'Video editors',
-  'Design & graphics',
-  'Social media',
-]
+export const roles = ['Photographers', 'Videographers', 'Photo editors', 'Video editors', 'Design and graphics', 'Social media']
 
-// Gallery preview — eight frames from recent coverage.
+// Gallery bento: exactly eight frames, eight cells.
 export const featured = [
-  { id: 'f1', event: 'Horizon', caption: 'Main stage, closing night', src: '/img/horizon-01.jpg', tone: 'from-purple-900/60' },
-  { id: 'f2', event: 'DYT20', caption: 'The winning run', src: '/img/dyt20-01.jpg', tone: 'from-blue-900/60' },
-  { id: 'f3', event: 'Ganpati', caption: 'Bappa, up close', src: '/img/ganpati-01.jpg', tone: 'from-amber-800/60' },
-  { id: 'f4', event: 'Marathon', caption: 'Kilometre nine', src: '/img/marathon-01.jpg', tone: 'from-emerald-900/60' },
-  { id: 'f5', event: 'Horizon', caption: 'In the pit', src: '/img/horizon-02.jpg', tone: 'from-rose-900/60' },
-  { id: 'f6', event: 'Fest', caption: 'Lights down, hands up', src: '/img/fest-01.jpg', tone: 'from-sky-900/60' },
-  { id: 'f7', event: 'DYT20', caption: 'The embrace at the crease', src: '/img/dyt20-02.jpg', tone: 'from-slate-700/60' },
-  { id: 'f8', event: 'Marathon', caption: 'Finish-line high-fives', src: '/img/marathon-02.jpg', tone: 'from-orange-900/60' },
+  { id: 'f1', src: '/img/horizon-01.jpg', alt: 'Horizon: the singer on the main stage under purple light' },
+  { id: 'f2', src: '/img/dyt20-01.jpg', alt: 'DYT20: a batter leaping after the winning run' },
+  { id: 'f3', src: '/img/ganpati-01.jpg', alt: 'Ganpati Utsav: the idol, close up' },
+  { id: 'f4', src: '/img/marathon-01.jpg', alt: 'RAIT Marathon: two runners mid-stride' },
+  { id: 'f5', src: '/img/horizon-02.jpg', alt: 'Horizon: the singer kneeling at the edge of the stage' },
+  { id: 'f6', src: '/img/fest-01.jpg', alt: 'College fest: the singer under pink stage light' },
+  { id: 'f7', src: '/img/dyt20-02.jpg', alt: 'DYT20: two batters embracing at the crease' },
+  { id: 'f8', src: '/img/marathon-02.jpg', alt: 'RAIT Marathon: runners high-fiving at the finish' },
 ]
 
-export const events = [
-  {
-    name: 'Induction 2026',
-    date: 'Aug 2026',
-    status: 'upcoming',
-    blurb: 'No fees. No experience. Just show up — the intake session for the next crew.',
-  },
-  {
-    name: 'Horizon',
-    date: 'Mar 2026',
-    status: 'past',
-    blurb: 'The cultural night. Three stages, one pit, and the longest edit session of the year.',
-  },
-  {
-    name: 'DY Patil T20 (DYT20)',
-    date: 'Mar 2026',
-    status: 'past',
-    blurb: 'Stadium coverage from the press box — sport shot fast and cut faster.',
-  },
-  {
-    name: 'RAIT Marathon',
-    date: 'Jan 2026',
-    status: 'past',
-    blurb: 'Sunrise start, nine kilometres, and a finish line full of faces to find.',
-  },
-  {
-    name: 'Ganpati Utsav',
-    date: 'Sep 2025',
-    status: 'past',
-    blurb: 'Campus mandap, aarti to visarjan, documented end to end.',
-  },
+// TODO: confirm event dates with the club.
+export const upcoming = {
+  name: 'Induction 2026',
+  date: 'August 2026',
+  blurb: 'The intake for the next crew. No fees and no experience needed. Bring yourself; we bring the cameras.',
+}
+
+export const pastEvents = [
+  { name: 'Horizon', date: 'March 2026', blurb: 'The cultural night. Three stages, one pit, and the longest edit of the year.', src: '/img/horizon-01.jpg' },
+  { name: 'DYT20', date: 'March 2026', blurb: 'Stadium coverage from the press box. Sport shot fast and cut faster.', src: '/img/dyt20-01.jpg' },
+  { name: 'RAIT Marathon', date: 'January 2026', blurb: 'A sunrise start and a finish line full of faces to find.', src: '/img/marathon-01.jpg' },
+  { name: 'Ganpati Utsav', date: 'September 2025', blurb: 'The campus mandap, from the first aarti to visarjan.', src: '/img/ganpati-01.jpg' },
 ]
 
+// Leadership, grouped. Add each person's name; cards show the role until then.
 export const team = [
-  { name: 'Secretary', role: 'Leads the club', unit: 'Core' },
-  { name: 'Joint Secretary', role: 'Runs the shoot roster', unit: 'Core' },
-  { name: 'Head of Photography', role: 'Stills, every event', unit: 'Photo' },
-  { name: 'Head of Videography', role: 'Reels and recaps', unit: 'Video' },
-  { name: 'Head of Editing', role: 'Same-day delivery', unit: 'Post' },
-  { name: 'Head of Design', role: 'Posters and identity', unit: 'Design' },
-  { name: 'Social Media Lead', role: 'Everything you see on the grid', unit: 'Social' },
-  { name: 'Members', role: '60+ students across every year', unit: 'Crew' },
+  {
+    group: 'Leadership',
+    people: [
+      { role: 'Secretary', name: '' },
+      { role: 'Joint Secretary', name: '' },
+    ],
+  },
+  {
+    group: 'On the shoot',
+    people: [
+      { role: 'Head of Photography', name: '' },
+      { role: 'Head of Videography', name: '' },
+    ],
+  },
+  {
+    group: 'After the shoot',
+    people: [
+      { role: 'Head of Editing', name: '' },
+      { role: 'Head of Design', name: '' },
+      { role: 'Social Media Lead', name: '' },
+    ],
+  },
 ]

@@ -3,31 +3,39 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      // Brand palette from the induction deck. Dark-only by design: the brand is
+      // black + one orange-red accent. No pure #000 / #fff anywhere.
       colors: {
-        ink: '#0A0A0A',
-        coal: '#111111',
-        smoke: '#1C1C1C',
-        flame: '#FF3B14',
-        ash: '#8A8A8A',
+        ink: '#0B0B0C', // page
+        coal: '#131314', // raised sections
+        smoke: '#1D1D1F', // image fallbacks, hovers
+        bone: '#EFEDE8', // primary text (off-white)
+        ash: '#9A9893', // secondary text, 7.0:1 on ink
+        flame: '#FF3B14', // the single accent
       },
       fontFamily: {
-        display: ['"Archivo Black"', '"Arial Black"', 'Impact', 'sans-serif'],
-        cond: ['"Barlow Condensed"', 'Oswald', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        // Anton matches the deck's heavy condensed headlines; IBM Plex Sans its body.
+        display: ['Anton', 'Impact', 'sans-serif'],
+        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+      },
+      // z-index scale, used nowhere else: nav < mobile menu < film grain.
+      zIndex: {
+        nav: '50',
+        grain: '60',
       },
       keyframes: {
         rise: {
-          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '0%': { opacity: '0', transform: 'translateY(28px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        shimmer: {
-          '0%': { backgroundPosition: '-500px 0' },
-          '100%': { backgroundPosition: '500px 0' },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
       animation: {
-        rise: 'rise 0.7s cubic-bezier(0.22,1,0.36,1) both',
-        shimmer: 'shimmer 1.4s linear infinite',
+        rise: 'rise 0.9s cubic-bezier(0.16,1,0.3,1) both',
+        marquee: 'marquee 38s linear infinite',
       },
     },
   },

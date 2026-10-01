@@ -1,31 +1,37 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { club, nav } from '../data/site.js'
+import { ArrowUpRight, EnvelopeSimple, InstagramLogo, List, X } from '@phosphor-icons/react'
+import Logo from './Logo.jsx'
+import { club, nav, primaryCta } from '../data/site.js'
 
-function Mark({ className = '' }) {
+function NavItem({ item, className, onClick }) {
+  if (item.href.startsWith('/#')) {
+    return (
+      <a href={item.href} className={className} onClick={onClick}>
+        {item.label}
+      </a>
+    )
+  }
   return (
-    <Link to="/" className={`flex items-center gap-2.5 ${className}`} aria-label="PhotoCircle RAIT home">
-      <span className="grid h-8 w-8 place-items-center border-2 border-flame">
-        <span className="h-2.5 w-2.5 rounded-full bg-flame" />
-      </span>
-      <span className="font-display text-sm uppercase leading-none tracking-tight">
-        Photo<span className="text-flame">Circle</span>
-        <span className="mt-0.5 block font-cond text-[10px] font-medium tracking-[0.35em] text-ash">RAIT</span>
-      </span>
-    </Link>
+    <NavLink to={item.href} onClick={onClick} className={({ isActive }) => `${className} ${isActive ? '!text-flame' : ''}`}>
+      {item.label}
+    </NavLink>
   )
 }
 
 export default function Layout() {
+  const sentinel = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const { pathname, hash } = useLocation()
 
+  // The nav turns solid once a 1px sentinel at the top of the page leaves view.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const el = sentinel.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting))
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
 
   useEffect(() => {
@@ -33,38 +39,31 @@ export default function Layout() {
     if (!hash) window.scrollTo({ top: 0 })
   }, [pathname, hash])
 
-  const linkClass = ({ isActive }) =>
-    `font-cond text-sm uppercase tracking-[0.2em] transition-colors ${
-      isActive ? 'text-flame' : 'text-white/70 hover:text-white'
-    }`
+  const solid = scrolled || open
 
   return (
-    <div className="min-h-screen bg-ink">
+    <div className="min-h-[100dvh] bg-ink">
+      <div ref={sentinel} aria-hidden className="absolute left-0 top-0 h-px w-px" />
+      <div aria-hidden className="film-grain pointer-events-none fixed inset-0 z-grain" />
+
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          scrolled || open ? 'border-b border-white/10 bg-ink/85 backdrop-blur-xl' : 'bg-transparent'
+        className={`fixed inset-x-0 top-0 z-nav transition-colors duration-300 ${
+          solid ? 'border-b border-bone/10 bg-ink/90 backdrop-blur-md' : 'border-b border-transparent'
         }`}
       >
-        <div className="shell flex h-16 items-center justify-between sm:h-20">
-          <Mark />
+        <div className="shell flex h-16 items-center justify-between lg:h-[72px]">
+          <Logo />
 
-          <nav className="hidden items-center gap-8 md:flex">
-            {nav.map((item) =>
-              item.href.startsWith('/#') ? (
-                <a key={item.label} href={item.href} className="font-cond text-sm uppercase tracking-[0.2em] text-white/70 transition-colors hover:text-white">
-                  {item.label}
-                </a>
-              ) : (
-                <NavLink key={item.label} to={item.href} className={linkClass}>
-                  {item.label}
-                </NavLink>
-              )
-            )}
-            <Link
-              to="/gallery"
-              className="border border-flame px-4 py-2 font-cond text-sm uppercase tracking-[0.2em] text-flame transition-colors hover:bg-flame hover:text-black"
-            >
-              Find your photos
+          <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
+            {nav.map((item) => (
+              <NavItem
+                key={item.label}
+                item={item}
+                className="text-sm font-medium text-bone/75 transition-colors hover:text-bone"
+              />
+            ))}
+            <Link to={primaryCta.href} className="btn-primary !px-5 !py-2.5 !text-xs">
+              {primaryCta.label}
             </Link>
           </nav>
 
@@ -72,30 +71,27 @@ export default function Layout() {
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            aria-label="Toggle navigation"
-            className="grid h-10 w-10 place-items-center md:hidden"
+            aria-controls="mobile-nav"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            className="grid h-11 w-11 place-items-center text-bone lg:hidden"
           >
-            <span className="relative block h-4 w-6">
-              <span className={`absolute left-0 h-0.5 w-6 bg-white transition-all ${open ? 'top-2 rotate-45' : 'top-0'}`} />
-              <span className={`absolute left-0 top-2 h-0.5 w-6 bg-white transition-opacity ${open ? 'opacity-0' : 'opacity-100'}`} />
-              <span className={`absolute left-0 h-0.5 w-6 bg-white transition-all ${open ? 'top-2 -rotate-45' : 'top-4'}`} />
-            </span>
+            {open ? <X size={26} weight="bold" /> : <List size={26} weight="bold" />}
           </button>
         </div>
 
         {open && (
-          <nav className="shell flex flex-col gap-1 pb-6 md:hidden">
-            {nav.map((item) =>
-              item.href.startsWith('/#') ? (
-                <a key={item.label} href={item.href} className="border-b border-white/5 py-3 font-display text-2xl uppercase">
-                  {item.label}
-                </a>
-              ) : (
-                <Link key={item.label} to={item.href} className="border-b border-white/5 py-3 font-display text-2xl uppercase text-flame">
-                  {item.label}
-                </Link>
-              )
-            )}
+          <nav id="mobile-nav" aria-label="Main" className="shell flex flex-col pb-8 pt-2 lg:hidden">
+            {nav.map((item) => (
+              <NavItem
+                key={item.label}
+                item={item}
+                onClick={() => setOpen(false)}
+                className="py-3 font-display text-3xl uppercase text-bone"
+              />
+            ))}
+            <Link to={primaryCta.href} className="btn-primary mt-5">
+              {primaryCta.label}
+            </Link>
           </nav>
         )}
       </header>
@@ -104,20 +100,20 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer id="contact" className="rule bg-coal">
-        <div className="shell grid gap-12 py-16 sm:py-20 md:grid-cols-[1.2fr_1fr_1fr]">
+      <footer id="contact" className="scroll-mt-20 bg-coal">
+        <div className="shell grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr] md:py-20">
           <div>
-            <Mark />
-            <p className="mt-5 max-w-sm font-sans text-sm leading-relaxed text-ash">{club.blurb}</p>
-            <p className="mt-6 font-display text-3xl uppercase text-flame sm:text-4xl">{club.hashtag}</p>
+            <Logo />
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-ash">{club.blurb}</p>
+            <p className="mt-8 font-display text-4xl uppercase text-flame">{club.hashtag}</p>
           </div>
 
           <div>
-            <h3 className="eyebrow">Explore</h3>
-            <ul className="mt-5 space-y-2.5">
+            <h2 className="text-sm font-semibold text-bone">Explore</h2>
+            <ul className="mt-4 space-y-2.5">
               {nav.map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="font-cond text-lg uppercase tracking-wide text-white/70 transition-colors hover:text-flame">
+                  <a href={item.href} className="text-sm text-ash transition-colors hover:text-bone">
                     {item.label}
                   </a>
                 </li>
@@ -126,25 +122,28 @@ export default function Layout() {
           </div>
 
           <div>
-            <h3 className="eyebrow">Find us</h3>
-            <ul className="mt-5 space-y-3 font-sans text-sm text-ash">
+            <h2 className="text-sm font-semibold text-bone">Contact</h2>
+            <ul className="mt-4 space-y-3 text-sm text-ash">
               <li>
-                <a href={club.instagram} target="_blank" rel="noreferrer" className="text-white transition-colors hover:text-flame">
-                  Instagram · {club.handle}
+                <a href={club.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-bone transition-colors hover:text-flame">
+                  <InstagramLogo size={18} />
+                  {club.handle}
+                  <ArrowUpRight size={14} />
                 </a>
               </li>
               <li>
-                <a href={`mailto:${club.email}`} className="transition-colors hover:text-flame">
+                <a href={`mailto:${club.email}`} className="inline-flex items-center gap-2 transition-colors hover:text-bone">
+                  <EnvelopeSimple size={18} />
                   {club.email}
                 </a>
               </li>
-              <li>{club.location}</li>
+              <li className="max-w-[16rem] leading-relaxed">{club.location}</li>
             </ul>
           </div>
         </div>
 
-        <div className="rule">
-          <div className="shell flex flex-col gap-2 py-6 font-cond text-xs uppercase tracking-[0.25em] text-ash sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-t border-bone/10">
+          <div className="shell flex flex-col gap-2 py-6 text-xs text-ash sm:flex-row sm:justify-between">
             <span>© {new Date().getFullYear()} PhotoCircle RAIT</span>
             <span>Shot today. Posted today.</span>
           </div>

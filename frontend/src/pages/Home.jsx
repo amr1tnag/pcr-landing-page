@@ -1,222 +1,276 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, InstagramLogo } from '@phosphor-icons/react'
 import Frame from '../components/Frame.jsx'
 import Reveal from '../components/Reveal.jsx'
-import { club, stats, pillars, roles, featured, events, team } from '../data/site.js'
+import { club, coverage, featured, pastEvents, pillars, primaryCta, roles, team, upcoming } from '../data/site.js'
 
+const rise = (ms) => ({ animationDelay: `${ms}ms` })
+
+/* 1. Hero: full-bleed stage photo, title set like the deck's cover. */
 function Hero() {
   return (
-    <section id="top" className="grain relative flex min-h-[100svh] items-end overflow-hidden">
-      {/* Hero imagery: drop a frame at public/img/hero.jpg to replace the gradient */}
-      <div className="absolute inset-0">
-        <img
-          src="/img/hero.jpg"
-          alt=""
-          onError={(e) => (e.currentTarget.style.display = 'none')}
-          className="h-full w-full object-cover opacity-70"
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_30%,#1d1d1d_0%,#0a0a0a_70%)] [z-index:-1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/30" />
-      </div>
+    <section id="top" className="relative flex min-h-[100dvh] items-end overflow-hidden">
+      <img
+        src="/img/hero.jpg"
+        alt=""
+        fetchpriority="high"
+        className="absolute inset-0 h-full w-full object-cover object-[62%_35%]"
+      />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/20" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/25 to-transparent" />
 
-      <div className="shell relative w-full pb-16 pt-28 sm:pb-24">
-        <p className="eyebrow animate-rise">The official media team of RAIT</p>
-
-        <h1 className="display mt-5 animate-rise text-[17vw] leading-[0.82] sm:text-[12vw] lg:text-[9.5rem]">
-          Photo<span className="block sm:inline">Circle</span>
+      <div className="shell relative pb-14 pt-24 md:pb-20">
+        <p className="eyebrow motion-safe:animate-rise" style={rise(0)}>
+          Official media team of RAIT
+        </p>
+        <h1 className="display mt-5 text-[clamp(4.25rem,14vw,10rem)] motion-safe:animate-rise" style={rise(80)}>
+          PhotoCircle
           <span className="block text-flame">RAIT</span>
         </h1>
-
-        <p className="mt-7 max-w-xl animate-rise font-cond text-xl uppercase tracking-wide text-white/80 sm:text-2xl">
-          {club.tagline}
+        <p className="mt-6 max-w-md text-lg leading-relaxed text-bone/85 motion-safe:animate-rise" style={rise(160)}>
+          {club.tagline} Every frame here was shot, edited and posted by students.
         </p>
-
-        <div className="mt-10 flex animate-rise flex-col gap-3 sm:flex-row">
-          <Link
-            to="/gallery"
-            className="group inline-flex items-center justify-center gap-3 bg-flame px-7 py-4 font-display text-sm uppercase tracking-wide text-black transition-transform hover:-translate-y-0.5"
-          >
-            Find your photos
-            <span className="transition-transform group-hover:translate-x-1">→</span>
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row motion-safe:animate-rise" style={rise(240)}>
+          <Link to={primaryCta.href} className="btn-primary group">
+            {primaryCta.label}
+            <ArrowRight size={18} weight="bold" className="motion-safe:transition-transform group-hover:translate-x-1" />
           </Link>
-          <a
-            href="#about"
-            className="inline-flex items-center justify-center border border-white/25 px-7 py-4 font-display text-sm uppercase tracking-wide text-white transition-colors hover:border-white hover:bg-white hover:text-black"
-          >
+          <a href="#about" className="btn-ghost">
             Who we are
           </a>
         </div>
-
-        <p className="mt-14 font-display text-2xl uppercase text-white/15 sm:text-4xl">{club.hashtag}</p>
       </div>
     </section>
   )
 }
 
-function Stats() {
+/* 2. Marquee: the breadth of what gets covered. The only marquee on the page. */
+function Coverage() {
+  const row = (hidden) => (
+    <ul
+      aria-hidden={hidden || undefined}
+      className={`flex shrink-0 items-center ${hidden ? 'motion-reduce:hidden' : 'motion-reduce:flex-wrap'}`}
+    >
+      {coverage.map((item) => (
+        <li key={item} className="flex items-center">
+          <span className="px-5 font-display text-4xl uppercase text-bone sm:px-7 sm:text-6xl">{item}</span>
+          <span aria-hidden className="font-display text-4xl text-flame sm:text-6xl">
+            /
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+
   return (
-    <section className="rule bg-coal">
-      <div className="shell grid grid-cols-2 divide-white/10 py-10 sm:py-14 lg:grid-cols-4 lg:divide-x">
-        {stats.map((s) => (
-          <Reveal key={s.label} className="px-2 py-5 text-center lg:px-6">
-            <p className="font-display text-4xl text-flame sm:text-5xl">{s.value}</p>
-            <p className="mt-2 font-cond text-xs uppercase tracking-[0.2em] text-ash sm:text-sm">{s.label}</p>
-          </Reveal>
-        ))}
+    <section aria-label="What we cover" className="overflow-hidden border-y border-bone/10 bg-coal py-6 sm:py-8">
+      <div className="flex w-max motion-safe:animate-marquee motion-reduce:w-full hover:[animation-play-state:paused]">
+        {row(false)}
+        {row(true)}
       </div>
     </section>
   )
 }
 
+/* 3. About: statement and pillars beside an offset two-photo collage. */
 function About() {
   return (
-    <section id="about" className="shell scroll-mt-24 py-20 sm:py-28">
-      <Reveal className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-        <div>
-          <p className="eyebrow">Who we are</p>
-          <h2 className="display mt-5 text-5xl sm:text-6xl lg:text-7xl">
-            Every photo
-            <br />
-            on this screen
-            <br />
-            was shot by
-            <br />
-            <span className="text-flame">a student</span>
+    <section id="about" className="shell scroll-mt-20 py-24 md:py-32">
+      <div className="grid gap-14 md:grid-cols-12 md:gap-10">
+        <Reveal className="md:col-span-6 md:pt-6">
+          <h2 className="display text-5xl sm:text-6xl lg:text-7xl">
+            Every photo here was shot by <span className="whitespace-nowrap text-flame">a student</span>
           </h2>
-        </div>
+          <p className="mt-7 max-w-[52ch] text-lg leading-relaxed text-bone/80">{club.blurb}</p>
 
-        <div className="flex flex-col justify-end gap-8">
-          <Frame src="/img/about.jpg" event="Horizon" caption="Shot from the pit" ratio="aspect-[16/10]" />
-          <p className="font-sans text-lg leading-relaxed text-white/75">{club.blurb}</p>
-          <p className="font-sans text-base leading-relaxed text-ash">
-            We run photography and editing workshops through the year, cover every cultural night, sports fixture,
-            fest and felicitation on campus, and build the media that the college actually posts. Quality content,
-            out the same day the event happens — that deadline is the whole discipline of this club.
-          </p>
-
-          <div className="grid gap-px overflow-hidden border border-white/10 bg-white/10 sm:grid-cols-3">
+          <dl className="mt-10 space-y-6 border-t border-bone/10 pt-8">
             {pillars.map((p) => (
-              <div key={p.title} className="bg-ink p-6">
-                <h3 className="font-display text-xl uppercase text-flame">{p.title}</h3>
-                <p className="mt-3 font-sans text-sm leading-relaxed text-ash">{p.body}</p>
+              <div key={p.title} className="grid grid-cols-[6.5rem_1fr] items-baseline gap-4">
+                <dt className="font-display text-2xl uppercase text-flame">{p.title}</dt>
+                <dd className="leading-relaxed text-ash">{p.body}</dd>
               </div>
             ))}
-          </div>
-        </div>
+          </dl>
+        </Reveal>
+
+        <Reveal delay={120} className="relative md:col-span-6">
+          <Frame src="/img/about.jpg" alt="A singer on stage in a wash of green light at Horizon" className="aspect-[4/5] md:ml-12" />
+          <Frame
+            src="/img/crew.jpg"
+            alt="A performer in a red jacket on stage, shot from the pit"
+            className="-mt-24 ml-auto aspect-[2/3] w-1/2 border-4 border-ink md:absolute md:-bottom-12 md:-left-4 md:mt-0 md:w-2/5"
+          />
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+/* 4. The standard: one full-bleed statement, as in the deck. */
+function Standard() {
+  return (
+    <section className="relative flex min-h-[80dvh] items-center overflow-hidden">
+      <img src="/img/standard.jpg" alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover object-[55%_30%]" />
+      <div aria-hidden className="absolute inset-0 bg-ink/70" />
+      <Reveal className="shell relative py-24 text-center">
+        <p className="eyebrow">The standard</p>
+        <h2 className="display mt-5 text-6xl sm:text-8xl lg:text-9xl">
+          Shot today.
+          <br />
+          Posted today.
+        </h2>
+        <p className="mx-auto mt-7 max-w-[46ch] text-lg leading-relaxed text-bone/85">
+          Every event, the photos and the edit go out the same day. You learn to shoot fast, cut fast and hold a
+          standard while doing it.
+        </p>
       </Reveal>
     </section>
   )
 }
 
-function GalleryPreview() {
+/* 5. Gallery: an eight-cell bento for eight frames. Images speak for themselves. */
+const bentoSpans = {
+  f1: 'col-span-2 row-span-2 md:col-span-4',
+  f2: 'md:col-span-2',
+  f3: 'md:col-span-2',
+  f4: 'md:col-span-2',
+  f5: 'md:col-span-2',
+  f6: 'md:col-span-2',
+  f7: 'md:col-span-3',
+  f8: 'col-span-2 md:col-span-3',
+}
+
+function Gallery() {
   return (
-    <section id="gallery" className="scroll-mt-24 bg-coal py-20 sm:py-28">
+    <section id="gallery" className="scroll-mt-20 bg-coal py-24 md:py-32">
       <div className="shell">
-        <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="eyebrow">Recent frames</p>
-            <h2 className="display mt-4 text-5xl sm:text-6xl">
-              We cover <span className="text-flame">everything</span>
-            </h2>
-          </div>
-          <Link
-            to="/gallery"
-            className="self-start font-cond text-sm uppercase tracking-[0.25em] text-flame underline-offset-8 hover:underline sm:self-auto"
-          >
-            Search by your face →
-          </Link>
+        <Reveal>
+          <h2 className="display text-5xl sm:text-7xl">
+            We cover <span className="text-flame">everything</span>
+          </h2>
+          <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-ash">
+            Cultural nights, sports, fests and felicitations. If it happens at RAIT, we are there with a camera.
+          </p>
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="mt-12 grid auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[220px] md:grid-cols-6 md:gap-4 lg:auto-rows-[250px]">
           {featured.map((f, i) => (
-            <Reveal key={f.id} delay={i * 60}>
-              <Frame {...f} alt={`${f.event} — ${f.caption}`} />
+            <Reveal key={f.id} delay={(i % 4) * 70} className={bentoSpans[f.id]}>
+              <Frame src={f.src} alt={f.alt} className="h-full" />
             </Reveal>
           ))}
         </div>
 
-        <p className="mt-10 font-cond text-lg uppercase tracking-wide text-white/60">
-          Cultural nights, sports, fests, felicitations — if it happens at RAIT, we are there with a camera.
-        </p>
+        <Reveal className="mt-12 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+          <p className="text-lg text-bone">Were you there?</p>
+          <Link to={primaryCta.href} className="btn-primary group">
+            {primaryCta.label}
+            <ArrowRight size={18} weight="bold" className="motion-safe:transition-transform group-hover:translate-x-1" />
+          </Link>
+        </Reveal>
       </div>
     </section>
   )
 }
 
+/* 6. Events: what's next, then a swipeable rail of past coverage. */
 function Events() {
-  return (
-    <section id="events" className="shell scroll-mt-24 py-20 sm:py-28">
-      <Reveal>
-        <p className="eyebrow">Timeline</p>
-        <h2 className="display mt-4 text-5xl sm:text-6xl">
-          Events we <span className="text-flame">shot</span>
-        </h2>
-      </Reveal>
+  const rail = useRef(null)
+  const scroll = (dir) => rail.current?.scrollBy({ left: dir * rail.current.clientWidth * 0.8, behavior: 'smooth' })
 
-      <ol className="mt-14 border-l border-white/10">
-        {events.map((e, i) => (
-          <Reveal key={e.name} delay={i * 70}>
-            <li className="relative grid gap-3 py-8 pl-8 sm:grid-cols-[150px_1fr] sm:gap-8 sm:pl-12">
-              <span
-                className={`absolute left-0 top-10 h-3 w-3 -translate-x-1/2 rounded-full ${
-                  e.status === 'upcoming' ? 'bg-flame ring-4 ring-flame/20' : 'bg-white/25'
-                }`}
-              />
-              <div>
-                <p className="font-cond text-sm uppercase tracking-[0.25em] text-ash">{e.date}</p>
-                {e.status === 'upcoming' && (
-                  <span className="mt-2 inline-block bg-flame px-2 py-0.5 font-cond text-[11px] uppercase tracking-[0.2em] text-black">
-                    Upcoming
-                  </span>
-                )}
-              </div>
-              <div>
-                <h3 className="font-display text-2xl uppercase sm:text-3xl">{e.name}</h3>
-                <p className="mt-2 max-w-2xl font-sans text-sm leading-relaxed text-ash">{e.blurb}</p>
-              </div>
-            </li>
-          </Reveal>
+  return (
+    <section id="events" className="scroll-mt-20 py-24 md:py-32">
+      <div className="shell">
+        <Reveal>
+          <h2 className="display text-5xl sm:text-7xl">Events</h2>
+        </Reveal>
+
+        <Reveal delay={80} className="mt-10 border-l-4 border-flame bg-coal p-7 sm:p-10">
+          <div>
+            <p className="text-sm font-semibold text-flame">Next up, {upcoming.date}</p>
+            <h3 className="display mt-3 text-5xl sm:text-6xl">{upcoming.name}</h3>
+            <p className="mt-4 max-w-[52ch] leading-relaxed text-ash">{upcoming.blurb}</p>
+          </div>
+        </Reveal>
+
+        <div className="mt-16 flex items-end justify-between gap-6">
+          <h3 className="text-xl font-semibold text-bone">Recently covered</h3>
+          <div className="hidden gap-2 md:flex">
+            <button type="button" onClick={() => scroll(-1)} aria-label="Scroll back" className="grid h-11 w-11 place-items-center border border-bone/25 text-bone transition-colors hover:border-bone active:scale-[0.97]">
+              <ArrowLeft size={18} />
+            </button>
+            <button type="button" onClick={() => scroll(1)} aria-label="Scroll forward" className="grid h-11 w-11 place-items-center border border-bone/25 text-bone transition-colors hover:border-bone active:scale-[0.97]">
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ul
+        ref={rail}
+        tabIndex={0}
+        aria-label="Past events"
+        className="rail mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-2 scroll-px-4 sm:px-8 sm:scroll-px-8 xl:px-[calc((100vw_-_80rem)/2_+_2rem)] xl:scroll-px-[calc((100vw_-_80rem)/2_+_2rem)]"
+      >
+        {pastEvents.map((e) => (
+          <li key={e.name} className="w-[78vw] max-w-[24rem] shrink-0 snap-start sm:w-[22rem]">
+            <Frame src={e.src} alt={`${e.name} coverage`} className="aspect-[4/3]" />
+            <p className="mt-4 text-sm text-ash">{e.date}</p>
+            <h4 className="mt-1 font-display text-3xl uppercase">{e.name}</h4>
+            <p className="mt-2 text-sm leading-relaxed text-ash">{e.blurb}</p>
+          </li>
         ))}
-      </ol>
+      </ul>
     </section>
   )
 }
 
-function Team() {
+/* 7. Crew: who does the work, and where a new member fits. */
+function Crew() {
   return (
-    <section id="team" className="scroll-mt-24 bg-coal py-20 sm:py-28">
-      <div className="shell">
-        <Reveal className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
-          <div>
-            <p className="eyebrow">The crew</p>
-            <h2 className="display mt-4 text-5xl sm:text-6xl">
-              Shot by
-              <br />
-              <span className="text-flame">students</span>
-            </h2>
-            <p className="mt-6 max-w-sm font-sans text-base leading-relaxed text-ash">
-              No professionals. No hired crew. Just members who learned on the job — and the seniors who teach the
-              next batch the same way.
-            </p>
+    <section id="team" className="scroll-mt-20 bg-coal py-24 md:py-32">
+      <div className="shell grid gap-16 md:grid-cols-12 md:gap-10">
+        <Reveal className="md:col-span-5">
+          <h2 className="display text-5xl sm:text-7xl">
+            Shot by <span className="text-flame">students</span>
+          </h2>
+          <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-bone/80">
+            No professionals and no hired crew. Just members who learned on the job, and seniors who teach the next
+            batch the same way.
+          </p>
 
-            <div className="mt-8">
-              <p className="eyebrow">Where you fit in</p>
-              <ul className="mt-4 grid grid-cols-2 gap-x-6">
-                {roles.map((r) => (
-                  <li key={r} className="border-b border-white/10 py-3 font-cond text-base uppercase tracking-wide text-white/80">
-                    {r}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 font-display text-lg uppercase text-flame">And anyone else — we train you</p>
-            </div>
-          </div>
+          <h3 className="mt-12 text-base font-semibold text-bone">Where you fit in</h3>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {roles.map((r) => (
+              <li key={r} className="border border-bone/20 px-4 py-2 text-sm text-bone/85">
+                {r}
+              </li>
+            ))}
+            <li className="bg-flame px-4 py-2 text-sm font-semibold text-ink">Anyone else: we train you</li>
+          </ul>
+        </Reveal>
 
-          <div className="grid gap-px self-start border border-white/10 bg-white/10 sm:grid-cols-2">
-            {team.map((m) => (
-              <div key={m.name} className="bg-coal p-6 transition-colors hover:bg-smoke">
-                <p className="font-cond text-[11px] uppercase tracking-[0.3em] text-flame">{m.unit}</p>
-                <h3 className="mt-2 font-display text-lg uppercase">{m.name}</h3>
-                <p className="mt-1 font-sans text-sm text-ash">{m.role}</p>
+        <Reveal delay={120} className="md:col-span-6 md:col-start-7">
+          <h3 className="text-base font-semibold text-bone">Who runs it</h3>
+          <div className="mt-4 space-y-8">
+            {team.map((g) => (
+              <div key={g.group} className="border-t border-bone/10 pt-5">
+                <p className="text-sm text-flame">{g.group}</p>
+                <ul className="mt-3 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                  {g.people.map((p) => (
+                    <li key={p.role}>
+                      {p.name ? (
+                        <>
+                          <span className="block text-lg font-medium text-bone">{p.name}</span>
+                          <span className="text-sm text-ash">{p.role}</span>
+                        </>
+                      ) : (
+                        <span className="block text-lg font-medium text-bone">{p.role}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -226,19 +280,14 @@ function Team() {
   )
 }
 
-function JoinCta() {
+/* 8. Join: the deck's orange slide, used once, as the closing call. */
+function Join() {
   return (
-    <section className="relative overflow-hidden bg-flame py-20 text-black sm:py-28">
-      <img
-        src="/img/join.jpg"
-        alt=""
-        onError={(e) => (e.currentTarget.style.display = 'none')}
-        className="absolute inset-0 h-full w-full object-cover opacity-15 mix-blend-multiply grayscale"
-      />
-      <div className="shell relative grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
-        <Reveal>
-          <p className="font-cond text-sm uppercase tracking-[0.35em]">How to join</p>
-          <h2 className="display mt-5 text-5xl sm:text-7xl">
+    <section className="relative overflow-hidden bg-flame py-24 text-ink md:py-32">
+      <div className="shell grid gap-12 md:grid-cols-12 md:items-end">
+        <Reveal className="md:col-span-7">
+          <p className="eyebrow !text-ink">How to join</p>
+          <h2 className="display mt-5 text-6xl sm:text-8xl">
             No fees.
             <br />
             No experience.
@@ -246,27 +295,14 @@ function JoinCta() {
             Just show up.
           </h2>
         </Reveal>
-        <Reveal delay={120} className="space-y-6">
-          <p className="font-sans text-lg leading-relaxed text-black/80">
-            Every shoot, session and update goes out on our socials first. Follow along, or come find yourself in
-            the gallery from the last event.
+        <Reveal delay={120} className="md:col-span-5">
+          <p className="max-w-[40ch] text-lg leading-relaxed text-ink/85">
+            Every shoot, session and update goes out on Instagram first. Follow along and come to the next induction.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={club.instagram}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center bg-black px-7 py-4 font-display text-sm uppercase tracking-wide text-white transition-transform hover:-translate-y-0.5"
-            >
-              {club.handle}
-            </a>
-            <Link
-              to="/gallery"
-              className="inline-flex items-center justify-center border-2 border-black px-7 py-4 font-display text-sm uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
-            >
-              Face search →
-            </Link>
-          </div>
+          <a href={club.instagram} target="_blank" rel="noreferrer" className="btn mt-8 bg-ink text-bone hover:-translate-y-0.5">
+            <InstagramLogo size={20} weight="bold" />
+            Follow on Instagram
+          </a>
         </Reveal>
       </div>
     </section>
@@ -277,12 +313,13 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Stats />
+      <Coverage />
       <About />
-      <GalleryPreview />
+      <Standard />
+      <Gallery />
       <Events />
-      <Team />
-      <JoinCta />
+      <Crew />
+      <Join />
     </>
   )
 }

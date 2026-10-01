@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Camera, UploadSimple } from '@phosphor-icons/react'
 
 /** Upload box with drag-and-drop plus an in-browser camera capture. */
 export default function SelfieInput({ onPick, disabled }) {
@@ -34,7 +35,7 @@ export default function SelfieInput({ onPick, disabled }) {
         }
       })
     } catch {
-      setCamError('Camera unavailable — upload a photo instead.')
+      setCamError('Camera unavailable. Upload a photo instead.')
     }
   }
 
@@ -66,21 +67,21 @@ export default function SelfieInput({ onPick, disabled }) {
   if (camera) {
     return (
       <div className="border border-white/15 bg-coal p-4">
-        <div className="relative overflow-hidden bg-black">
+        <div className="relative overflow-hidden bg-ink">
           <video ref={videoRef} playsInline muted className="h-full w-full -scale-x-100 object-cover" />
         </div>
         <div className="mt-4 flex gap-3">
           <button
             type="button"
             onClick={capture}
-            className="flex-1 bg-flame px-5 py-3 font-display text-sm uppercase tracking-wide text-black"
+            className="flex-1 bg-flame px-5 py-3 font-display text-sm uppercase tracking-wide text-ink active:scale-[0.98]"
           >
             Capture
           </button>
           <button
             type="button"
             onClick={stopCamera}
-            className="border border-white/20 px-5 py-3 font-cond text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white"
+            className="border border-bone/20 px-5 py-3 text-sm font-medium text-bone/80 hover:border-bone/50 hover:text-bone"
           >
             Cancel
           </button>
@@ -110,9 +111,11 @@ export default function SelfieInput({ onPick, disabled }) {
           dragging ? 'border-flame bg-flame/5' : 'border-white/20 bg-coal hover:border-white/40'
         } ${disabled ? 'pointer-events-none opacity-50' : ''}`}
       >
-        <span className="grid h-14 w-14 place-items-center rounded-full border-2 border-flame text-2xl text-flame">+</span>
+        <span className="grid h-14 w-14 place-items-center border-2 border-flame text-flame">
+          <UploadSimple size={26} weight="bold" />
+        </span>
         <p className="mt-5 font-display text-lg uppercase">Drop a selfie here</p>
-        <p className="mt-2 font-sans text-sm text-ash">or click to browse · JPG, PNG · one clear face works best</p>
+        <p className="mt-2 text-sm text-ash">or click to browse · JPG, PNG · one clear face works best</p>
         <input
           ref={fileRef}
           type="file"
@@ -127,11 +130,12 @@ export default function SelfieInput({ onPick, disabled }) {
           type="button"
           onClick={startCamera}
           disabled={disabled}
-          className="font-cond text-sm uppercase tracking-[0.2em] text-flame underline-offset-8 hover:underline disabled:opacity-50"
+          className="inline-flex items-center gap-2 py-2 text-sm font-semibold text-flame underline-offset-8 hover:underline disabled:opacity-50"
         >
+          <Camera size={18} weight="bold" />
           Use camera instead
         </button>
-        {camError && <span className="font-sans text-xs text-ash">{camError}</span>}
+        {camError && <span className="text-xs text-ash">{camError}</span>}
       </div>
     </div>
   )

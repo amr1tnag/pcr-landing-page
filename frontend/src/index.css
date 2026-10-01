@@ -10,43 +10,60 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
-  @apply bg-ink text-white antialiased;
+  @apply bg-ink font-sans text-bone antialiased;
 }
 
 ::selection {
   background: #ff3b14;
-  color: #000;
+  color: #0b0b0c;
 }
 
-/* Thin custom scrollbar, photography-dark */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #262626; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #ff3b14; }
+:focus-visible {
+  outline: 2px solid #ff3b14;
+  outline-offset: 3px;
+}
 
 @layer components {
+  /* Wide-tracked label. Rationed: hero, "The standard", "How to join". */
   .eyebrow {
-    @apply font-cond text-flame tracking-[0.35em] uppercase text-xs sm:text-sm;
+    @apply text-xs font-medium uppercase tracking-[0.32em] text-flame sm:text-sm;
   }
   .display {
-    @apply font-display uppercase leading-[0.86] tracking-[-0.02em];
+    @apply font-display uppercase leading-[0.92];
   }
   .shell {
-    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-8;
   }
-  .rule {
-    @apply border-t border-white/10;
+  .btn {
+    @apply inline-flex items-center justify-center gap-2.5 whitespace-nowrap px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] transition-[transform,background-color,color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98];
+  }
+  .btn-primary {
+    @apply btn bg-flame text-ink hover:-translate-y-0.5;
+  }
+  .btn-ghost {
+    @apply btn border border-bone/30 text-bone hover:border-bone hover:bg-bone hover:text-ink;
   }
 }
 
-/* Film-grain overlay used on hero */
-.grain::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.22;
-  mix-blend-mode: overlay;
+/* Film grain: one fixed, non-interactive layer (never on scrolling containers). */
+.film-grain {
+  opacity: 0.07;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0b0b0c; }
+::-webkit-scrollbar-thumb { background: #2a2a2c; }
+::-webkit-scrollbar-thumb:hover { background: #ff3b14; }
+
+/* Horizontal rails: hide the bar, keep the scroll */
+.rail { scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
