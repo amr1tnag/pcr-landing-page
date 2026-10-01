@@ -91,12 +91,12 @@ function ResultCard({ match }) {
         <div className="grid h-full w-full place-items-center bg-coal text-sm text-ash">Photo unavailable</div>
       )}
 
-      <span className="absolute left-3 top-3 bg-ink/80 px-2 py-1 text-xs font-semibold text-flame backdrop-blur">
+      <span className="absolute left-3 top-3 bg-ink/80 px-2 py-1 text-xs font-semibold text-accent backdrop-blur">
         {Math.round(confidence * 100)}% match
       </span>
 
       <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/95 via-ink/20 to-transparent p-4 opacity-0 transition-opacity duration-300 focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
-        <p className="font-display text-lg uppercase text-flame">{photo.event || 'Unsorted'}</p>
+        <p className="font-display text-lg uppercase text-accent">{photo.event || 'Unsorted'}</p>
         <p className="mt-0.5 truncate text-xs text-bone/70">{photo.date || photo.name}</p>
         <div className="mt-3 flex gap-2">
           <a
@@ -104,7 +104,7 @@ function ResultCard({ match }) {
             download={photo.name}
             target={photo.src.drive ? '_blank' : undefined}
             rel="noreferrer"
-            className="flex flex-1 items-center justify-center gap-1.5 bg-flame py-2.5 text-xs font-semibold text-ink active:scale-[0.98]"
+            className="flex flex-1 items-center justify-center gap-1.5 bg-accent py-2.5 text-xs font-semibold text-ink active:scale-[0.98]"
           >
             <DownloadSimple size={16} weight="bold" />
             Download
@@ -215,7 +215,7 @@ export default function FaceSearch() {
       <section className="shell py-12 sm:py-16">
         <p className="eyebrow">Face search</p>
         <h1 className="display mt-4 text-5xl sm:text-7xl">
-          Find <span className="text-flame">yourself</span>
+          Find <span className="text-accent">yourself</span>
           <br />
           in the archive
         </h1>
@@ -227,11 +227,11 @@ export default function FaceSearch() {
 
       {unavailable && (
         <section className="shell">
-          <div className="border border-flame/40 bg-flame/5 p-5">
-            <p className="text-sm font-semibold text-flame">Face search is coming soon</p>
+          <div className="border border-accent/40 bg-accent/5 p-5">
+            <p className="text-sm font-semibold text-accent">Face search is coming soon</p>
             <p className="mt-2 text-sm text-bone/75">
               We&apos;re indexing the archive. Until then, catch every event&apos;s photos on Instagram at{' '}
-              <a href={club.instagram} target="_blank" rel="noreferrer" className="text-flame underline-offset-4 hover:underline">
+              <a href={club.instagram} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
                 {club.handle}
               </a>
               .
@@ -274,7 +274,7 @@ export default function FaceSearch() {
                   onClick={() => setTolerance(p.value)}
                   aria-pressed={tolerance === p.value}
                   className={`border py-2.5 text-sm font-medium transition-colors active:scale-[0.98] ${
-                    tolerance === p.value ? 'border-flame bg-flame text-ink' : 'border-bone/20 text-bone/75 hover:border-bone/50'
+                    tolerance === p.value ? 'border-accent bg-accent text-ink' : 'border-bone/20 text-bone/75 hover:border-bone/50'
                   }`}
                 >
                   {p.label}
@@ -293,7 +293,7 @@ export default function FaceSearch() {
                 id="event-filter"
                 value={event}
                 onChange={(e) => setEvent(e.target.value)}
-                className="mt-3 w-full border border-bone/20 bg-coal px-3 py-3 text-sm text-bone focus:border-flame"
+                className="mt-3 w-full border border-bone/20 bg-coal px-3 py-3 text-sm text-bone focus:border-accent"
               >
                 <option value="">All events</option>
                 {events.map((e) => (
@@ -324,7 +324,7 @@ export default function FaceSearch() {
         <div ref={resultsRef} className="min-h-[300px] scroll-mt-24">
           {status === 'loading' && (
             <>
-              <p role="status" className="mb-6 text-sm font-semibold text-flame">
+              <p role="status" className="mb-6 text-sm font-semibold text-accent">
                 {PHASES[phase]}
               </p>
               <Skeleton />
@@ -332,8 +332,8 @@ export default function FaceSearch() {
           )}
 
           {status === 'error' && (
-            <div role="alert" className="border border-flame/40 bg-flame/5 p-6">
-              <p className="text-base font-semibold text-flame">Couldn&apos;t search</p>
+            <div role="alert" className="border border-accent/40 bg-accent/5 p-6">
+              <p className="text-base font-semibold text-accent">Couldn&apos;t search</p>
               <p className="mt-2 text-sm text-bone/75">{error}</p>
             </div>
           )}
@@ -342,7 +342,7 @@ export default function FaceSearch() {
             <>
               <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 border-b border-bone/10 pb-4">
                 <p className="font-display text-3xl uppercase">
-                  {matches.length} <span className="text-flame">result{matches.length === 1 ? '' : 's'}</span>
+                  {matches.length} <span className="text-accent">result{matches.length === 1 ? '' : 's'}</span>
                 </p>
                 <p className="text-sm text-ash">{summary}</p>
               </div>
@@ -367,7 +367,7 @@ export default function FaceSearch() {
                     ['Download', 'Every frame you appear in comes back, best match first, ready to save or share.'],
                   ].map(([label, step]) => (
                     <li key={label} className="grid grid-cols-[6.5rem_1fr] items-baseline gap-4">
-                      <span className="font-display text-xl uppercase text-flame">{label}</span>
+                      <span className="font-display text-xl uppercase text-accent">{label}</span>
                       <span className="text-sm leading-relaxed text-bone/75">{step}</span>
                     </li>
                   ))}

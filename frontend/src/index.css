@@ -21,19 +21,19 @@ body {
 }
 
 ::selection {
-  background: #ff3b14;
+  background: #ffce00;
   color: #0b0b0c;
 }
 
 :focus-visible {
-  outline: 2px solid #ff3b14;
+  outline: 2px solid #ffce00;
   outline-offset: 3px;
 }
 
 @layer components {
   /* Wide-tracked label. Rationed: hero, "The standard", "How to join". */
   .eyebrow {
-    @apply text-xs font-medium uppercase tracking-[0.32em] text-flame sm:text-sm;
+    @apply text-xs font-medium uppercase tracking-[0.32em] text-accent sm:text-sm;
   }
   .display {
     @apply font-display uppercase leading-[0.92];
@@ -45,7 +45,7 @@ body {
     @apply inline-flex items-center justify-center gap-2.5 whitespace-nowrap px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] transition-[transform,background-color,color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98];
   }
   .btn-primary {
-    @apply btn bg-flame text-ink hover:-translate-y-0.5;
+    @apply btn bg-accent text-ink hover:-translate-y-0.5;
   }
   .btn-ghost {
     @apply btn border border-bone/30 text-bone hover:border-bone hover:bg-bone hover:text-ink;
@@ -62,7 +62,7 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #0b0b0c; }
 ::-webkit-scrollbar-thumb { background: #2a2a2c; }
-::-webkit-scrollbar-thumb:hover { background: #ff3b14; }
+::-webkit-scrollbar-thumb:hover { background: #ffce00; }
 
 /* Horizontal rails: hide the bar, keep the scroll */
 .rail { scrollbar-width: none; }

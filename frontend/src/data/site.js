@@ -63,28 +63,22 @@ export const pastEvents = [
   { name: 'Ganpati Utsav', date: 'September 2025', blurb: 'The campus mandap, from the first aarti to visarjan.', src: '/img/ganpati-01.jpg' },
 ]
 
-// Leadership, grouped. Add each person's name; cards show the role until then.
+// The core team, grouped. Each entry shows the name with the role under it.
 export const team = [
   {
     group: 'Leadership',
     people: [
-      { role: 'Secretary', name: '' },
-      { role: 'Joint Secretary', name: '' },
+      { role: 'President', name: 'Dwijesh Rahatekar' },
+      { role: 'Vice President', name: 'Soham Darne' },
+      { role: 'Treasurer', name: 'Mansi Cheble' },
     ],
   },
   {
-    group: 'On the shoot',
+    group: 'Heads',
     people: [
-      { role: 'Head of Photography', name: '' },
-      { role: 'Head of Videography', name: '' },
-    ],
-  },
-  {
-    group: 'After the shoot',
-    people: [
-      { role: 'Head of Editing', name: '' },
-      { role: 'Head of Design', name: '' },
-      { role: 'Social Media Lead', name: '' },
+      { role: 'Editor in Chief', name: 'Amrit Nag' },
+      { role: 'Technical Head', name: 'Krrish Vaishya' },
+      { role: 'Coordinator', name: 'Amey Nagesh' },
     ],
   },
 ]

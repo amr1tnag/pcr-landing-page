@@ -13,7 +13,7 @@ function NavItem({ item, className, onClick }) {
     )
   }
   return (
-    <NavLink to={item.href} onClick={onClick} className={({ isActive }) => `${className} ${isActive ? '!text-flame' : ''}`}>
+    <NavLink to={item.href} onClick={onClick} className={({ isActive }) => `${className} ${isActive ? '!text-accent' : ''}`}>
       {item.label}
     </NavLink>
   )
@@ -105,7 +105,7 @@ export default function Layout() {
           <div>
             <Logo />
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-ash">{club.blurb}</p>
-            <p className="mt-8 font-display text-4xl uppercase text-flame">{club.hashtag}</p>
+            <p className="mt-8 font-display text-4xl uppercase text-accent">{club.hashtag}</p>
           </div>
 
           <div>
@@ -125,7 +125,7 @@ export default function Layout() {
             <h2 className="text-sm font-semibold text-bone">Contact</h2>
             <ul className="mt-4 space-y-3 text-sm text-ash">
               <li>
-                <a href={club.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-bone transition-colors hover:text-flame">
+                <a href={club.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-bone transition-colors hover:text-accent">
                   <InstagramLogo size={18} />
                   {club.handle}
                   <ArrowUpRight size={14} />

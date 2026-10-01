@@ -66,7 +66,7 @@ export default function SelfieInput({ onPick, disabled }) {
 
   if (camera) {
     return (
-      <div className="border border-white/15 bg-coal p-4">
+      <div className="border border-bone/15 bg-coal p-4">
         <div className="relative overflow-hidden bg-ink">
           <video ref={videoRef} playsInline muted className="h-full w-full -scale-x-100 object-cover" />
         </div>
@@ -74,7 +74,7 @@ export default function SelfieInput({ onPick, disabled }) {
           <button
             type="button"
             onClick={capture}
-            className="flex-1 bg-flame px-5 py-3 font-display text-sm uppercase tracking-wide text-ink active:scale-[0.98]"
+            className="flex-1 bg-accent px-5 py-3 font-display text-sm uppercase tracking-wide text-ink active:scale-[0.98]"
           >
             Capture
           </button>
@@ -108,10 +108,10 @@ export default function SelfieInput({ onPick, disabled }) {
         tabIndex={0}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && fileRef.current?.click()}
         className={`grid cursor-pointer place-items-center border border-dashed px-6 py-14 text-center transition-colors ${
-          dragging ? 'border-flame bg-flame/5' : 'border-white/20 bg-coal hover:border-white/40'
+          dragging ? 'border-accent bg-accent/5' : 'border-bone/20 bg-coal hover:border-bone/40'
         } ${disabled ? 'pointer-events-none opacity-50' : ''}`}
       >
-        <span className="grid h-14 w-14 place-items-center border-2 border-flame text-flame">
+        <span className="grid h-14 w-14 place-items-center border-2 border-accent text-accent">
           <UploadSimple size={26} weight="bold" />
         </span>
         <p className="mt-5 font-display text-lg uppercase">Drop a selfie here</p>
@@ -130,7 +130,7 @@ export default function SelfieInput({ onPick, disabled }) {
           type="button"
           onClick={startCamera}
           disabled={disabled}
-          className="inline-flex items-center gap-2 py-2 text-sm font-semibold text-flame underline-offset-8 hover:underline disabled:opacity-50"
+          className="inline-flex items-center gap-2 py-2 text-sm font-semibold text-accent underline-offset-8 hover:underline disabled:opacity-50"
         >
           <Camera size={18} weight="bold" />
           Use camera instead

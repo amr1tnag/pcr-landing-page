@@ -26,7 +26,7 @@ function Hero() {
         </p>
         <h1 className="display mt-5 text-[clamp(4.25rem,14vw,10rem)] motion-safe:animate-rise" style={rise(80)}>
           PhotoCircle
-          <span className="block text-flame">RAIT</span>
+          <span className="block text-accent">RAIT</span>
         </h1>
         <p className="mt-6 max-w-md text-lg leading-relaxed text-bone/85 motion-safe:animate-rise" style={rise(160)}>
           {club.tagline} Every frame here was shot, edited and posted by students.
@@ -55,7 +55,7 @@ function Coverage() {
       {coverage.map((item) => (
         <li key={item} className="flex items-center">
           <span className="px-5 font-display text-4xl uppercase text-bone sm:px-7 sm:text-6xl">{item}</span>
-          <span aria-hidden className="font-display text-4xl text-flame sm:text-6xl">
+          <span aria-hidden className="font-display text-4xl text-accent sm:text-6xl">
             /
           </span>
         </li>
@@ -80,14 +80,14 @@ function About() {
       <div className="grid gap-14 md:grid-cols-12 md:gap-10">
         <Reveal className="md:col-span-6 md:pt-6">
           <h2 className="display text-5xl sm:text-6xl lg:text-7xl">
-            Every photo here was shot by <span className="whitespace-nowrap text-flame">a student</span>
+            Every photo here was shot by <span className="whitespace-nowrap text-accent">a student</span>
           </h2>
           <p className="mt-7 max-w-[52ch] text-lg leading-relaxed text-bone/80">{club.blurb}</p>
 
           <dl className="mt-10 space-y-6 border-t border-bone/10 pt-8">
             {pillars.map((p) => (
               <div key={p.title} className="grid grid-cols-[6.5rem_1fr] items-baseline gap-4">
-                <dt className="font-display text-2xl uppercase text-flame">{p.title}</dt>
+                <dt className="font-display text-2xl uppercase text-accent">{p.title}</dt>
                 <dd className="leading-relaxed text-ash">{p.body}</dd>
               </div>
             ))}
@@ -147,7 +147,7 @@ function Gallery() {
       <div className="shell">
         <Reveal>
           <h2 className="display text-5xl sm:text-7xl">
-            We cover <span className="text-flame">everything</span>
+            We cover <span className="text-accent">everything</span>
           </h2>
           <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-ash">
             Cultural nights, sports, fests and felicitations. If it happens at RAIT, we are there with a camera.
@@ -186,9 +186,9 @@ function Events() {
           <h2 className="display text-5xl sm:text-7xl">Events</h2>
         </Reveal>
 
-        <Reveal delay={80} className="mt-10 border-l-4 border-flame bg-coal p-7 sm:p-10">
+        <Reveal delay={80} className="mt-10 border-l-4 border-accent bg-coal p-7 sm:p-10">
           <div>
-            <p className="text-sm font-semibold text-flame">Next up, {upcoming.date}</p>
+            <p className="text-sm font-semibold text-accent">Next up, {upcoming.date}</p>
             <h3 className="display mt-3 text-5xl sm:text-6xl">{upcoming.name}</h3>
             <p className="mt-4 max-w-[52ch] leading-relaxed text-ash">{upcoming.blurb}</p>
           </div>
@@ -233,7 +233,7 @@ function Crew() {
       <div className="shell">
         <Reveal>
           <h2 className="display text-5xl sm:text-7xl">
-            Shot by <span className="text-flame">students</span>
+            Shot by <span className="text-accent">students</span>
           </h2>
           <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-bone/80">
             No professionals and no hired crew. Just members who learned on the job, and seniors who teach the next
@@ -259,7 +259,7 @@ function Crew() {
                   {r}
                 </li>
               ))}
-              <li className="bg-flame px-4 py-2 text-sm font-semibold text-ink">Anyone else: we train you</li>
+              <li className="bg-accent px-4 py-2 text-sm font-semibold text-ink">Anyone else: we train you</li>
             </ul>
           </Reveal>
 
@@ -268,7 +268,7 @@ function Crew() {
             <div className="mt-4 space-y-8">
               {team.map((g) => (
                 <div key={g.group} className="border-t border-bone/10 pt-5">
-                  <p className="text-sm text-flame">{g.group}</p>
+                  <p className="text-sm text-accent">{g.group}</p>
                   <ul className="mt-3 grid gap-x-8 gap-y-3 sm:grid-cols-2">
                     {g.people.map((p) => (
                       <li key={p.role}>
@@ -293,10 +293,10 @@ function Crew() {
   )
 }
 
-/* 8. Join: the deck's orange slide, used once, as the closing call. */
+/* 8. Join: the deck's colour-block slide, used once, as the closing call. */
 function Join() {
   return (
-    <section className="relative overflow-hidden bg-flame py-24 text-ink md:py-32">
+    <section className="relative overflow-hidden bg-accent py-24 text-ink md:py-32">
       <div className="shell grid gap-12 md:grid-cols-12 md:items-end">
         <Reveal className="md:col-span-7">
           <p className="eyebrow !text-ink">How to join</p>

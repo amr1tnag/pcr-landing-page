@@ -4,14 +4,14 @@ export default {
   theme: {
     extend: {
       // Brand palette from the induction deck. Dark-only by design: the brand is
-      // black + one orange-red accent. No pure #000 / #fff anywhere.
+      // black + one yellow accent (#FFCE00). No pure #000 / #fff anywhere.
       colors: {
         ink: '#0B0B0C', // page
         coal: '#131314', // raised sections
         smoke: '#1D1D1F', // image fallbacks, hovers
         bone: '#EFEDE8', // primary text (off-white)
         ash: '#9A9893', // secondary text, 7.0:1 on ink
-        flame: '#FF3B14', // the single accent
+        accent: '#FFCE00', // the single accent
       },
       fontFamily: {
         // Anton matches the deck's heavy condensed headlines; IBM Plex Sans its body.

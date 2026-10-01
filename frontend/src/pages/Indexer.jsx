@@ -38,7 +38,7 @@ function Field({ label, htmlFor, hint, children }) {
 }
 
 const input =
-  'w-full border border-bone/20 bg-ink px-3 py-3 text-sm text-bone placeholder:text-ash/70 focus:border-flame'
+  'w-full border border-bone/20 bg-ink px-3 py-3 text-sm text-bone placeholder:text-ash/70 focus:border-accent'
 
 export default function Indexer() {
   const [index, setIndex] = useState(null)
@@ -232,7 +232,7 @@ export default function Indexer() {
               ].map(([value, label, sub]) => (
                 <label
                   key={value}
-                  className={`cursor-pointer border p-4 transition-colors ${source === value ? 'border-flame bg-flame/5' : 'border-bone/20 hover:border-bone/40'}`}
+                  className={`cursor-pointer border p-4 transition-colors ${source === value ? 'border-accent bg-accent/5' : 'border-bone/20 hover:border-bone/40'}`}
                 >
                   <input type="radio" name="source" value={value} checked={source === value} onChange={() => setSource(value)} className="sr-only" />
                   <span className="block text-sm font-semibold text-bone">{label}</span>
@@ -253,7 +253,7 @@ export default function Indexer() {
                 >
                   <input id="ix-key" type="password" autoComplete="off" className={input} value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="AIza..." />
                   <label className="flex items-center gap-2 text-xs text-ash">
-                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="accent-flame" />
+                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="accent-accent" />
                     Remember on this device
                   </label>
                 </Field>
@@ -287,7 +287,7 @@ export default function Indexer() {
           </div>
 
           {error && (
-            <p role="alert" className="border border-flame/40 bg-flame/5 p-4 text-sm text-bone">
+            <p role="alert" className="border border-accent/40 bg-accent/5 p-4 text-sm text-bone">
               {error}
             </p>
           )}
@@ -295,7 +295,7 @@ export default function Indexer() {
           {state === 'running' ? (
             <div className="space-y-3" role="status">
               <div className="h-2 bg-smoke">
-                <div className="h-full bg-flame transition-[width] duration-300" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-accent transition-[width] duration-300" style={{ width: `${pct}%` }} />
               </div>
               <p className="text-sm text-bone/80">
                 {progress.done} of {progress.total} photos, {progress.faces} faces found. {progress.current}
@@ -311,7 +311,7 @@ export default function Indexer() {
           )}
 
           {state === 'done' && (
-            <div className="space-y-3 border-l-4 border-flame bg-coal p-6">
+            <div className="space-y-3 border-l-4 border-accent bg-coal p-6">
               <p className="font-semibold text-bone">
                 Indexed {progress.done - skipped.length} photos and found {progress.faces} faces.
               </p>
@@ -347,14 +347,14 @@ export default function Indexer() {
                         <span className="text-bone">
                           {e.name} <span className="text-ash">({e.photo_count})</span>
                         </span>
-                        <button type="button" onClick={() => removeEvent(e.name)} aria-label={`Remove ${e.name}`} className="p-1 text-ash hover:text-flame">
+                        <button type="button" onClick={() => removeEvent(e.name)} aria-label={`Remove ${e.name}`} className="p-1 text-ash hover:text-accent">
                           <Trash size={16} />
                         </button>
                       </li>
                     ))}
                   </ul>
                 )}
-                <label className="mt-5 inline-block cursor-pointer text-xs text-flame underline-offset-4 hover:underline">
+                <label className="mt-5 inline-block cursor-pointer text-xs text-accent underline-offset-4 hover:underline">
                   Continue from a faces.json on this computer
                   <input type="file" accept="application/json,.json" className="sr-only" onChange={(e) => loadLocalIndex(e.target.files?.[0])} />
                 </label>
@@ -368,7 +368,7 @@ export default function Indexer() {
               <li>Download the updated faces.json.</li>
               <li>
                 Open the{' '}
-                <a href={REPO_UPLOAD_URL} target="_blank" rel="noreferrer" className="text-flame underline-offset-4 hover:underline">
+                <a href={REPO_UPLOAD_URL} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
                   upload page on GitHub
                 </a>
                 , drop the file in and commit. It replaces the old one.
