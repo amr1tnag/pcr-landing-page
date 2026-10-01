@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, assetUrl } from '../api.js'
+import { club } from '../data/site.js'
 import SelfieInput from '../components/SelfieInput.jsx'
 
 const TOLERANCE_PRESETS = [
@@ -193,12 +194,27 @@ export default function FaceSearch() {
       {offline && (
         <section className="shell">
           <div className="border border-flame/40 bg-flame/5 p-5">
-            <p className="font-display text-sm uppercase tracking-wide text-flame">Index offline</p>
-            <p className="mt-2 font-sans text-sm text-white/70">
-              The search service isn&apos;t reachable. Start it with{' '}
-              <code className="bg-black/50 px-1.5 py-0.5 text-flame">uvicorn app.main:app --reload</code> from the{' '}
-              <code className="bg-black/50 px-1.5 py-0.5 text-flame">backend/</code> folder.
-            </p>
+            {import.meta.env.DEV ? (
+              <>
+                <p className="font-display text-sm uppercase tracking-wide text-flame">Index offline</p>
+                <p className="mt-2 font-sans text-sm text-white/70">
+                  The search service isn&apos;t reachable. Start it with{' '}
+                  <code className="bg-black/50 px-1.5 py-0.5 text-flame">uvicorn app.main:app --reload</code> from the{' '}
+                  <code className="bg-black/50 px-1.5 py-0.5 text-flame">backend/</code> folder.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-display text-sm uppercase tracking-wide text-flame">Face search is coming soon</p>
+                <p className="mt-2 font-sans text-sm text-white/70">
+                  We&apos;re indexing the archive. Until then, catch every event&apos;s photos on Instagram at{' '}
+                  <a href={club.instagram} target="_blank" rel="noreferrer" className="text-flame underline-offset-4 hover:underline">
+                    {club.handle}
+                  </a>
+                  .
+                </p>
+              </>
+            )}
           </div>
         </section>
       )}
@@ -268,10 +284,14 @@ export default function FaceSearch() {
           <button
             type="button"
             onClick={run}
-            disabled={!file || status === 'loading'}
+            disabled={!file || status === 'loading' || (offline && !import.meta.env.DEV)}
             className="mt-6 w-full bg-flame py-4 font-display text-sm uppercase tracking-wide text-black transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/40"
           >
-            {status === 'loading' ? 'Scanning the archive…' : 'Search the archive'}
+            {offline && !import.meta.env.DEV
+              ? 'Search coming soon'
+              : status === 'loading'
+                ? 'Scanning the archive…'
+                : 'Search the archive'}
           </button>
 
           <p className="mt-4 font-sans text-xs leading-relaxed text-ash">
