@@ -3,5 +3,20 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!api/|photos/|img/|assets/|models/|wasm/|data/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/((?!api/|photos/|img/|assets/|models/|wasm/|data/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/search.js": {
+      "maxDuration": 30,
+      "includeFiles": "{public/models/**,public/data/faces.json,node_modules/@tensorflow/tfjs-backend-wasm/dist/*.wasm}"
+    },
+    "api/health.js": {
+      "maxDuration": 30,
+      "includeFiles": "{public/models/**,public/data/faces.json,node_modules/@tensorflow/tfjs-backend-wasm/dist/*.wasm}"
+    }
+  }
 }

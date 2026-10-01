@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { DownloadSimple, MagnifyingGlass, ShareNetwork } from '@phosphor-icons/react'
 import SelfieInput from '../components/SelfieInput.jsx'
 import { club } from '../data/site.js'
-import { downloadUrl, encodeSelfie, eventsOf, fetchIndex, photoUrl, search, shareUrl } from '../lib/faces.js'
+import { downloadUrl, eventsOf, fetchIndex, fileToCanvas, photoUrl, shareUrl } from '../lib/faces.js'
 
 // Euclidean distance between 128-d face descriptors. The model's textbook cut-off is 0.6;
 // on low-light stage photos strangers start appearing above ~0.55, so presets sit lower.
@@ -13,9 +13,32 @@ const TOLERANCE_PRESETS = [
 ]
 
 const PHASES = {
-  model: 'Loading the face model. This happens once, then your browser keeps it.',
-  detect: 'Finding your face in the photo.',
-  match: 'Comparing it with every face in the archive.',
+  upload: 'Sending your selfie.',
+  match: 'Finding your face and comparing it with every face in the archive.',
+}
+
+const MAX_UPLOAD = 3.5 * 1024 * 1024 // base64 adds a third; Vercel caps bodies at 4.5 MB
+
+function readAsDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
+/** Shrink the selfie on the phone before upload; send the original if that fails. */
+async function selfieForUpload(file) {
+  try {
+    const { canvas } = await fileToCanvas(file, 1280)
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9))
+    if (blob) return readAsDataUrl(blob)
+  } catch {
+    /* fall back to the original file; the server can decode and rotate it */
+  }
+  if (file.size > MAX_UPLOAD) throw new Error('That photo is too large to send. Try a screenshot of it, or the camera button.')
+  return readAsDataUrl(file)
 }
 
 function Skeleton() {
@@ -108,7 +131,7 @@ export default function FaceSearch() {
   const [tolerance, setTolerance] = useState(0.52)
   const [event, setEvent] = useState('')
   const [status, setStatus] = useState('idle') // idle | loading | done | error
-  const [phase, setPhase] = useState('model')
+  const [phase, setPhase] = useState('upload')
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const resultsRef = useRef(null)
@@ -147,26 +170,26 @@ export default function FaceSearch() {
   const run = async () => {
     if (!file || !index) return
     setStatus('loading')
-    setPhase('model')
+    setPhase('upload')
     setError('')
     try {
-      const selfie = await encodeSelfie(file, setPhase)
-      if (selfie.problem === 'none') {
-        throw new Error('No face found in that photo. Try a brighter, front-facing shot.')
-      }
-      if (selfie.problem === 'unclear') {
-        throw new Error('Your face is too small or unclear in that photo. Use a closer, front-facing selfie in good light.')
-      }
+      const image = await selfieForUpload(file)
       setPhase('match')
-      await new Promise((r) => setTimeout(r, 0)) // let the phase text paint
-      setResult(search(index, selfie.descriptor, { tolerance, event }))
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image, tolerance, event }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(body.detail || `Search failed (${res.status}). Please try again.`)
+      setResult(body)
       setStatus('done')
       // On phones the results sit below the controls, so bring them into view.
       if (window.matchMedia('(max-width: 1023px)').matches) {
         requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
       }
     } catch (e) {
-      setError(e.message || 'Search failed.')
+      setError(e.message === 'Failed to fetch' ? 'No connection to the search server. Check your internet and try again.' : e.message || 'Search failed.')
       setStatus('error')
     }
   }
@@ -293,7 +316,7 @@ export default function FaceSearch() {
           </button>
 
           <p className="mt-4 text-xs leading-relaxed text-ash">
-            Your selfie never leaves your device. The matching runs in your browser.
+            Your selfie is used only for this search and is never stored.
           </p>
         </div>
 
@@ -340,7 +363,7 @@ export default function FaceSearch() {
                 <ol className="mt-5 space-y-4">
                   {[
                     ['Index', 'We scan every event photo and store a face signature for each person in it.'],
-                    ['Match', 'Your browser turns your selfie into the same kind of signature and compares them all.'],
+                    ['Match', 'Your selfie becomes the same kind of signature and is compared with all of them.'],
                     ['Download', 'Every frame you appear in comes back, best match first, ready to save or share.'],
                   ].map(([label, step]) => (
                     <li key={label} className="grid grid-cols-[6.5rem_1fr] items-baseline gap-4">

@@ -6,27 +6,32 @@ This is the site for **PhotoCircle RAIT**, the official media team of Ramrao Adi
 - **Face search** (`/gallery`): upload a selfie or use the camera to get every event photo you appear in, with download and share buttons.
 - **Photo indexer** (`/indexer`, for the club): adds an event's photos to face search.
 
-It is a static React site on Vercel. **There is no server and no running cost.** Face matching happens in the visitor's browser.
+It is a React site on Vercel, with one Vercel serverless function for face search. **There is no server to rent and no running cost.**
 
 ```
 frontend/
-  src/lib/faces.js        face detection, matching, index format, Google Drive listing
+  api/search.js           POST a selfie -> matching photos (Vercel function)
+  api/health.js           GET -> model backend + index size, for checking a deploy
+  server/matcher.js       decodes/rotates the photo (sharp), finds the face, matches the index
+  src/lib/faces.js        browser-side detection for the indexer, index format, Drive listing
   src/pages/FaceSearch.jsx   /gallery
   src/pages/Indexer.jsx      /indexer
   src/data/site.js        all landing-page copy (events, team, links)
   public/data/faces.json  the face index (photo list + face signatures)
-  public/models/          face model weights (self-hosted)
-  public/wasm/            TensorFlow.js WebAssembly fallback (self-hosted)
-backend/                  optional Python server (not used by the site; see the end)
+  public/models/          face model weights
+  public/wasm/            TensorFlow.js WebAssembly files for the indexer
+backend/                  optional standalone Python server (not used by the site; see the end)
 ```
 
 ## How face search works
 
-1. **Indexing (club side):** on `/indexer`, your browser runs the face detector on an event's photos. It uses the SSD detector over the whole frame plus overlapping tiles, so small faces in crowd shots are found. Each face becomes a 128-number signature in `faces.json`.
-2. **Searching (visitor side):** `/gallery` downloads the model once (~7 MB, then cached), finds the largest face in the selfie, and compares it with every signature.
-3. **Privacy:** the selfie never leaves the visitor's device.
+1. **Indexing (club side, on a laptop):** `/indexer` runs the face detector in your browser on an event's photos. It uses the SSD detector over the whole frame plus overlapping tiles, so small faces in crowd shots are found. Each face becomes a 128-number signature in `faces.json`.
+2. **Searching (visitor side, any phone):** `/gallery` shrinks the selfie on the phone and sends it to `/api/search`. The function finds the largest face and compares it with every signature in `faces.json`. Phones don't download the face model, so search works on any phone. A search takes about a second once the function is warm. The first one after a quiet spell takes a few seconds longer.
+3. **Privacy:** the selfie is processed in memory for that one search and never stored.
 
-The model is [`@vladmandic/face-api`](https://github.com/vladmandic/face-api). Its recognition network is a port of dlib's ResNet, the model behind Python's `face_recognition`. It runs on WebGL where available, falls back to WebAssembly, then to plain JavaScript.
+Both sides use the same model, [`@vladmandic/face-api`](https://github.com/vladmandic/face-api). Its recognition network is a port of dlib's ResNet, the model behind Python's `face_recognition`.
+- **Server:** the function runs it on TensorFlow.js with WebAssembly, so there are no native builds. If WebAssembly can't start, it falls back to plain JavaScript, which is slower but still works.
+- **Checking a deploy:** `GET /api/health` reports which backend is running and the size of the index.
 
 **Quality gates.** Signatures from tiny or doubtful faces are close to noise and match strangers, so:
 - The indexer drops faces that are both small and low-confidence.
@@ -84,7 +89,9 @@ npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 ```
 
-Vercel builds from `frontend/`. `frontend/vercel.json` rewrites client routes to the SPA.
+Vercel builds from `frontend/`. `frontend/vercel.json` rewrites client routes to the SPA and configures the two functions: a 30-second limit, plus bundling the model files, the index and the WebAssembly binary.
+
+To run the API locally as well, use `npx vercel dev` from `frontend/`.
 
 ## Landing-page content
 
