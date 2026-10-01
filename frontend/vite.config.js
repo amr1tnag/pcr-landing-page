@@ -3,11 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': 'http://localhost:8000',
-      '/photos': 'http://localhost:8000',
-    },
-  },
+  // face-api (with TensorFlow.js) is one ~1.3 MB chunk, lazy-loaded on /gallery and /indexer only.
+  build: { chunkSizeWarningLimit: 1400 },
+  server: { port: 5173 },
 })
