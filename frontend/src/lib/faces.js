@@ -16,7 +16,10 @@ async function lib() {
       // Fastest first: WebGL (GPU), then WebAssembly, then plain JS. The .wasm
       // binaries are self-hosted in public/wasm (tfjs 4.22, matching face-api).
       faceapi.tf.setWasmPaths?.('/wasm/')
-      for (const backend of ['webgl', 'wasm', 'cpu']) {
+      // iPhones and iPads often run WebGL at reduced float precision, where the
+      // detector silently finds nothing, so they start on WebAssembly instead.
+      const order = isAppleMobile() ? ['wasm', 'webgl', 'cpu'] : ['webgl', 'wasm', 'cpu']
+      for (const backend of order) {
         try {
           if (await faceapi.tf.setBackend(backend)) break
         } catch {
@@ -28,6 +31,33 @@ async function lib() {
     })
   }
   return libPromise
+}
+
+function isAppleMobile() {
+  const ua = navigator.userAgent || ''
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+/**
+ * Run a detection task; if WebGL throws or finds nothing, retry once on
+ * WebAssembly. Covers GPUs whose precision quietly breaks the detector.
+ */
+async function withBackendFallback(task) {
+  const faceapi = await lib()
+  if (faceapi.tf.getBackend() === 'webgl') {
+    try {
+      const result = await task()
+      if (result.length) return result
+    } catch {
+      /* fall through to WebAssembly */
+    }
+    try {
+      if (await faceapi.tf.setBackend('wasm')) await faceapi.tf.ready()
+    } catch {
+      return task()
+    }
+  }
+  return task()
 }
 
 async function ensureNets(faceapi, detector) {
@@ -49,17 +79,38 @@ export async function prepare(detector = 'tiny') {
   return faceapi
 }
 
-/** Decode a File/Blob into a canvas, EXIF-rotated and capped at MAX_EDGE. */
+// Decode with EXIF rotation applied. createImageBitmap's imageOrientation option
+// is missing on older Safari, so fall back to an <img>, which modern browsers
+// draw upright.
+async function decode(file) {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    return { source: bitmap, w: bitmap.width, h: bitmap.height, done: () => bitmap.close?.() }
+  } catch {
+    /* try the <img> route */
+  }
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+    return { source: img, w: img.naturalWidth, h: img.naturalHeight, done: () => URL.revokeObjectURL(url) }
+  } catch {
+    URL.revokeObjectURL(url)
+    throw new Error("This photo's format can't be opened here (HEIC photos often can't). Try a JPEG, a screenshot of it, or the camera button.")
+  }
+}
+
+/** Decode a File/Blob into a canvas, EXIF-rotated and capped at maxEdge. */
 export async function fileToCanvas(file, maxEdge = MAX_EDGE) {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height))
+  const { source, w, h, done } = await decode(file)
+  const scale = Math.min(1, maxEdge / Math.max(w, h))
   const canvas = document.createElement('canvas')
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale))
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale))
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-  const size = { w: bitmap.width, h: bitmap.height }
-  bitmap.close?.()
-  return { canvas, size }
+  canvas.width = Math.max(1, Math.round(w * scale))
+  canvas.height = Math.max(1, Math.round(h * scale))
+  canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height)
+  done()
+  return { canvas, size: { w, h } }
 }
 
 function options(faceapi, detector) {
@@ -162,7 +213,8 @@ export async function encodeSelfie(file, onPhase = () => {}) {
   let faces = []
   for (const detector of ['tiny', 'ssd']) {
     onPhase(loaded.has(detector === 'ssd' ? 'ssdMobilenetv1' : 'tinyFaceDetector') ? 'detect' : 'model')
-    faces = await encodeAll(canvas, detector)
+    await prepare(detector)
+    faces = await withBackendFallback(() => encodeAll(canvas, detector))
     if (faces.length) break
   }
   if (!faces.length) return { problem: 'none' }
