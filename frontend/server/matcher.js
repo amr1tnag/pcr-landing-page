@@ -9,7 +9,7 @@ import sharp from 'sharp'
 
 const require = createRequire(import.meta.url)
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
-const MODELS = path.join(ROOT, 'public', 'models')
+const MODELS = path.join(ROOT, 'server', 'models')
 const INDEX = path.join(ROOT, 'public', 'data', 'faces.json')
 
 // Same gates as the browser version (see src/lib/faces.js).
@@ -66,10 +66,10 @@ function loadIndex() {
 }
 
 /** Decode any common photo, apply its EXIF rotation, and downscale it. */
-async function toTensor(faceapi, buffer) {
+async function toTensor(faceapi, buffer, maxEdge = SELFIE_MAX_EDGE) {
   const { data, info } = await sharp(buffer, { failOn: 'none' })
     .rotate()
-    .resize({ width: SELFIE_MAX_EDGE, height: SELFIE_MAX_EDGE, fit: 'inside', withoutEnlargement: true })
+    .resize({ width: maxEdge, height: maxEdge, fit: 'inside', withoutEnlargement: true })
     .removeAlpha()
     .toColourspace('srgb')
     .raw()
@@ -160,4 +160,85 @@ export async function status() {
     photos: index.photos.length,
     faces: index.photos.reduce((n, p) => n + p.faces.length, 0),
   }
+}
+
+// ---- indexing (used by /api/admin/index-photo) ----
+
+const INDEX_MAX_EDGE = 2400
+
+// Overlapping crops: SSD shrinks its input to 512px, so small crowd faces need tiles.
+function tiles(w, h) {
+  const regions = [{ x: 0, y: 0, w, h }]
+  if (Math.max(w, h) < 900) return regions
+  const cols = w >= h ? (w / h > 1.6 ? 3 : 2) : 2
+  const rows = h > w ? (h / w > 1.6 ? 3 : 2) : 2
+  const tw = Math.min(w, Math.round((w / cols) * 1.3))
+  const th = Math.min(h, Math.round((h / rows) * 1.3))
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = Math.round(Math.min(Math.max(0, (c + 0.5) * (w / cols) - tw / 2), w - tw))
+      const y = Math.round(Math.min(Math.max(0, (r + 0.5) * (h / rows) - th / 2), h - th))
+      regions.push({ x, y, w: tw, h: th })
+    }
+  }
+  return regions
+}
+
+function overlap(a, b) {
+  const ix = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x))
+  const iy = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y))
+  return (ix * iy) / Math.min(a.w * a.h, b.w * b.h)
+}
+
+// Measured on the club's photos: a helmeted batter came out at 32px / 0.43 (junk),
+// a side-lit singer at 106px / 0.44 (real). Small faces must be confident; doubtful ones large.
+function usableForIndex(face) {
+  if (face.side < 24) return false
+  return face.score >= 0.6 || face.side >= 60
+}
+
+function toB64(f32) {
+  return Buffer.from(f32.buffer, f32.byteOffset, f32.byteLength).toString('base64')
+}
+
+/** Every usable face in an event photo, as base64 signatures for faces.json. */
+export async function indexPhoto(buffer) {
+  const faceapi = await engine()
+  let tensor
+  try {
+    tensor = await toTensor(faceapi, buffer, INDEX_MAX_EDGE)
+  } catch {
+    throw new PhotoError("That file couldn't be opened as a photo.")
+  }
+  const [h, w] = tensor.shape
+  const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4, maxResults: 200 })
+  const found = []
+  try {
+    for (const region of tiles(w, h)) {
+      const crop = region.w === w && region.h === h ? tensor : faceapi.tf.slice(tensor, [region.y, region.x, 0], [region.h, region.w, 3])
+      try {
+        const results = await faceapi.detectAllFaces(crop, options).withFaceLandmarks().withFaceDescriptors()
+        for (const f of results) {
+          const b = f.detection.box
+          found.push({
+            descriptor: f.descriptor,
+            score: f.detection.score,
+            box: { x: b.x + region.x, y: b.y + region.y, w: b.width, h: b.height },
+          })
+        }
+      } finally {
+        if (crop !== tensor) crop.dispose()
+      }
+    }
+  } finally {
+    tensor.dispose()
+  }
+  found.sort((a, b) => b.score - a.score)
+  const kept = []
+  for (const f of found) if (!kept.some((k) => overlap(k.box, f.box) > 0.5)) kept.push(f)
+  const faces = kept
+    .map((f) => ({ ...f, side: Math.min(f.box.w, f.box.h) }))
+    .filter(usableForIndex)
+    .map((f) => toB64(f.descriptor))
+  return { w, h, faces }
 }

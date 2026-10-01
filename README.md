@@ -6,32 +6,35 @@ This is the site for **PhotoCircle RAIT**, the official media team of Ramrao Adi
 - **Face search** (`/gallery`): upload a selfie or use the camera to get every event photo you appear in, with download and share buttons.
 - **Photo indexer** (`/indexer`, for the club): adds an event's photos to face search.
 
-It is a React site on Vercel, with one Vercel serverless function for face search. **There is no server to rent and no running cost.**
+It is a React site on Vercel, with a few Vercel serverless functions for face search. **There is no server to rent and no running cost.** Photos live in Google Drive.
 
 ```
 frontend/
-  api/search.js           POST a selfie -> matching photos (Vercel function)
-  api/health.js           GET -> model backend + index size, for checking a deploy
-  server/matcher.js       decodes/rotates the photo (sharp), finds the face, matches the index
-  src/lib/faces.js        browser-side detection for the indexer, index format, Drive listing
-  src/pages/FaceSearch.jsx   /gallery
-  src/pages/Indexer.jsx      /indexer
-  src/data/site.js        all landing-page copy (events, team, links)
-  public/data/faces.json  the face index (photo list + face signatures)
-  public/models/          face model weights
-  public/wasm/            TensorFlow.js WebAssembly files for the indexer
-backend/                  optional standalone Python server (not used by the site; see the end)
+  api/search.js             POST a selfie -> matching photos
+  api/health.js             GET -> model backend + index size, to check a deploy
+  api/admin/list.js         list a Drive folder (admin password)
+  api/admin/index-photo.js  find the faces in one Drive photo (admin password)
+  api/admin/publish.js      commit the updated index to GitHub (admin password)
+  server/matcher.js         face model: decode/rotate (sharp), detect, match, index
+  server/admin.js           Drive API, GitHub publishing, password check
+  server/models/            face model weights
+  src/pages/FaceSearch.jsx  /gallery
+  src/pages/Indexer.jsx     /indexer (for the club)
+  src/data/site.js          all landing-page copy (events, team, links)
+  public/data/faces.json    the face index: photo list + face signatures
+backend/                    optional standalone Python server (not used by the site; see the end)
 ```
 
 ## How face search works
 
-1. **Indexing (club side, on a laptop):** `/indexer` runs the face detector in your browser on an event's photos. It uses the SSD detector over the whole frame plus overlapping tiles, so small faces in crowd shots are found. Each face becomes a 128-number signature in `faces.json`.
-2. **Searching (visitor side, any phone):** `/gallery` shrinks the selfie on the phone and sends it to `/api/search`. The function finds the largest face and compares it with every signature in `faces.json`. Phones don't download the face model, so search works on any phone. A search takes about a second once the function is warm. The first one after a quiet spell takes a few seconds longer.
-3. **Privacy:** the selfie is processed in memory for that one search and never stored.
+- **Searching (any phone):** `/gallery` shrinks the selfie and sends it to `/api/search`. The function finds the largest face and compares it with every signature in `faces.json`. Phones never download the face model. A search takes about a second when warm, and a few seconds after a quiet spell.
+- **Indexing (any device):**
+  1. On `/indexer` you paste a Drive folder link.
+  2. The server lists the folder and pulls each photo from Drive at 2400px. It finds the faces using SSD over the full frame plus overlapping tiles, which catches small faces in crowd shots.
+  3. It commits the updated `faces.json` to GitHub, and Vercel redeploys within about a minute.
+- **Privacy:** selfies are processed in memory for one search and never stored. `faces.json` is public, like the photos. It holds face signatures, not images.
 
-Both sides use the same model, [`@vladmandic/face-api`](https://github.com/vladmandic/face-api). Its recognition network is a port of dlib's ResNet, the model behind Python's `face_recognition`.
-- **Server:** the function runs it on TensorFlow.js with WebAssembly, so there are no native builds. If WebAssembly can't start, it falls back to plain JavaScript, which is slower but still works.
-- **Checking a deploy:** `GET /api/health` reports which backend is running and the size of the index.
+**The model.** The model is [`@vladmandic/face-api`](https://github.com/vladmandic/face-api). Its recognition network is a port of dlib's ResNet, the model behind Python's `face_recognition`. On the server it runs on TensorFlow.js with WebAssembly, so there are no native builds. If WebAssembly can't start, it falls back to plain JavaScript.
 
 **Quality gates.** Signatures from tiny or doubtful faces are close to noise and match strangers, so:
 - The indexer drops faces that are both small and low-confidence.
@@ -49,36 +52,39 @@ On the club's stage photos, strangers start to appear above about 0.55.
 
 **Known limits.** Like `face_recognition`, the model is weakest on profile, head-down, eyes-closed or heavily stage-lit faces. A clear, front-facing selfie gives the best results.
 
-**Index visibility.** `faces.json` is public, like the photos. It contains face signatures, not images.
+## One-time setup (Vercel environment variables)
 
-## Adding an event (the club's workflow)
+In **Vercel → the project → Settings → Environment Variables**, add these for Production, then redeploy:
 
-### One-time setup: a free Google API key
+| Name | What it is | Where to get it |
+|---|---|---|
+| `PCR_ADMIN_PASSWORD` | The password for `/indexer` | Make one up and share it with the core team |
+| `GOOGLE_API_KEY` | Lets the server list Drive folders | Google Cloud Console (steps below), free, no billing |
+| `GITHUB_TOKEN` | Lets the server commit `faces.json` | GitHub fine-grained token (steps below) |
 
-The indexer uses the Drive API to look up each photo's ID in the event's Drive folder.
+### `GOOGLE_API_KEY`
 
-1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create a project. No billing is needed.
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create a project.
 2. Go to **APIs & Services → Library**, find **Google Drive API**, and click **Enable**.
-3. Go to **APIs & Services → Credentials**, then **Create credentials → API key**.
-4. Click **Edit** on the key and set **API restrictions** to **Google Drive API**. Under **Website restrictions**, add your site and `localhost`.
+3. Go to **Credentials → Create credentials → API key**.
+4. Edit the key and set **API restrictions** to **Google Drive API**.
 
-The key is typed into the indexer page only. You can tick "remember on this device", which stores it in that browser. It is never committed or added to the site.
+### `GITHUB_TOKEN`
 
-### For each event
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+2. Under **Repository access**, choose **Only select repositories** and pick `amr1tnag/pcr-landing-page`.
+3. Under **Permissions → Repository permissions**, set **Contents** to **Read and write**.
+4. Set an expiry, and renew the token when it runs out.
 
-1. **Upload the photos to Google Drive.** Put them in one folder per event, then use **Share → General access → Anyone with the link (Viewer)**.
-2. **Index them.** Open `https://<your-site>/indexer`, then:
-   - enter the event name and date;
-   - paste the Drive folder link;
-   - choose the **same photos** from your computer (folder or files);
-   - click **Index photos**.
+## Adding an event
 
-   Matching between Drive and your computer is by file name. Indexing is fastest in Chrome on a laptop, at roughly 0.5–2 seconds a photo.
-3. **Publish.** Click **Download faces.json**, then use the indexer's link to GitHub's upload page for `frontend/public/data/` and commit the file. Vercel redeploys in about a minute.
+1. **Upload to Drive.** Put the photos in a Google Drive folder, one per event. Then use **Share → General access → Anyone with the link (Viewer)**.
+2. **Index and publish.** Open `https://<your-site>/indexer` on a phone or laptop and sign in with the admin password. Enter the event name and date, paste the folder link, and press **Index and publish**. A few hundred photos take a few minutes.
+3. **Wait for the redeploy.** About a minute later, search includes the new photos.
 
-Re-indexing an event replaces its existing photos. The trash icon removes an event, and "Continue from a faces.json" resumes from a file on your computer.
+**Re-indexing and removing.** Re-indexing a folder replaces photos with the same file names. The trash icon removes a whole event.
 
-**Photos on the site itself.** The "This website" source indexes images committed under `frontend/public` instead of Drive. The starter index uses this source for the club photos already on the landing page, including the team photo, so search works from day one. You can remove those events in the indexer.
+**Starter events.** These index photos already on the site (`src: url` in `faces.json`, including the team photo), so search works from day one. Remove them once real events are in.
 
 ## Running locally
 
@@ -89,7 +95,7 @@ npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 ```
 
-Vercel builds from `frontend/`. `frontend/vercel.json` rewrites client routes to the SPA and configures the two functions: a 30-second limit, plus bundling the model files, the index and the WebAssembly binary.
+Vercel builds from `frontend/`. `frontend/vercel.json` rewrites client routes to the SPA and configures the functions: a 60-second limit, plus bundling the model weights, the index and the WebAssembly binary.
 
 To run the API locally as well, use `npx vercel dev` from `frontend/`.
 
