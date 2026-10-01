@@ -40,3 +40,9 @@ ALLOWED_ORIGINS = [
     ).split(",")
     if o.strip()
 ]
+
+# Shared secret for the admin upload/reindex endpoints. Unset = admin API disabled.
+ADMIN_TOKEN = os.getenv("PCR_ADMIN_TOKEN", "").strip()
+
+# Per-file cap for admin uploads (full-resolution JPEGs from a DSLR fit comfortably).
+MAX_ADMIN_UPLOAD_BYTES = int(os.getenv("PCR_MAX_ADMIN_UPLOAD_MB", "40")) * 1024 * 1024

@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import db
+from .admin import router as admin_router
 from .config import ALLOWED_ORIGINS, DEFAULT_TOLERANCE, FRONTEND_DIST, PHOTOS_DIR
 from .faces import FaceEngineUnavailable, confidence, distances, encode_query, engine_available
 
@@ -33,6 +34,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+app.include_router(admin_router)
 
 # Full-resolution originals are served straight off disk.
 PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -101,6 +104,19 @@ def photos(event: str = "", limit: int = 60, offset: int = 0) -> dict:
         ).fetchone()["c"]
 
     return {"total": total, "count": len(rows), "photos": [serialize(r) for r in rows]}
+
+
+@app.get("/api/photos/{photo_id}/download")
+def download(photo_id: int):
+    """Serve a photo as an attachment — the HTML download attribute is ignored cross-origin."""
+    with db.session() as conn:
+        row = conn.execute("SELECT path, filename FROM photos WHERE id = ?", (photo_id,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Photo not found.")
+    path = (PHOTOS_DIR / row["path"]).resolve()
+    if PHOTOS_DIR not in path.parents or not path.is_file():
+        raise HTTPException(status_code=404, detail="Photo file is missing.")
+    return FileResponse(path, filename=row["filename"])
 
 
 @app.post("/api/search")

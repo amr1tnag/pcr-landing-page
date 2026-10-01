@@ -68,7 +68,7 @@ After `npm run build`, FastAPI serves the built site as well as the API, so one 
 
 ```bash
 cd frontend && npm run build && cd ../backend
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1   # one worker: index jobs run in-process
 ```
 
 With Docker:
@@ -79,6 +79,36 @@ docker compose up -d --build
 docker compose exec pcr python -m app.indexer
 # → http://localhost:8000
 ```
+
+## Production: Vercel (site) + Render (face-search API)
+
+The site is deployed on Vercel from `frontend/` (see `frontend/vercel.json`). The Python API can't run on Vercel, because dlib and its models are too large and the storage is ephemeral. It runs on Render instead, from `render.yaml`.
+
+**1. Create the API on Render**
+
+On Render, go to **New → Blueprint**, pick this repo and apply. That creates `pcr-api`:
+- built from `backend/Dockerfile` (the first build compiles dlib, about 10–15 min)
+- in the Singapore region
+- with a 5 GB persistent disk at `/data` for photos and the index
+- with a random `PCR_ADMIN_TOKEN`
+
+The Blueprint uses the **Starter** plan, because Render only attaches persistent disks to paid instances. On the free plan the app runs, but every deploy or restart wipes all uploaded photos and the index. Free instances also sleep after 15 minutes idle, so the next search waits about a minute.
+
+**2. Point the site at it**
+
+In Vercel, go to **Project → Settings → Environment Variables**. Add `VITE_API_BASE` = `https://<your-service>.onrender.com`, then redeploy. If your Vercel domain changes, update `PCR_ALLOWED_ORIGINS` on Render to match.
+
+**3. Upload photos**
+
+Copy `PCR_ADMIN_TOKEN` from Render → Environment, then run this from `backend/` on your laptop:
+
+```bash
+export PCR_API_URL=https://<your-service>.onrender.com PCR_ADMIN_TOKEN=<token>
+python -m app.upload --source "~/Pictures/Horizon 2026-03-14"   # one event
+python -m app.upload --source ~/Pictures/PCR --tree              # a folder of event folders
+```
+
+The CLI uploads in small batches with retries, then triggers an incremental index and waits for it to finish. Re-running it is safe, because unchanged photos are skipped. The admin API (`/api/admin/photos`, `/reindex`, `/status`) is disabled unless `PCR_ADMIN_TOKEN` is set.
 
 ## Configuration
 
@@ -92,6 +122,7 @@ docker compose exec pcr python -m app.indexer
 | `PCR_MAX_EDGE` | `2400` | Images are downscaled to this size before detection |
 | `PCR_FRONTEND_DIST` | `frontend/dist` | Built site to serve, if present |
 | `PCR_ALLOWED_ORIGINS` | `localhost:5173` | CORS origins, comma-separated |
+| `PCR_ADMIN_TOKEN` | *(unset)* | Enables the admin upload/reindex API |
 | `VITE_API_BASE` | *(empty)* | Frontend build-time API origin, if the API is hosted elsewhere |
 
 ## How matching works

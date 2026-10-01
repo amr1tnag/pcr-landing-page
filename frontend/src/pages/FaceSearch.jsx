@@ -74,7 +74,7 @@ function ResultCard({ photo }) {
         </p>
         <div className="mt-3 flex gap-2">
           <a
-            href={url}
+            href={assetUrl(`/api/photos/${photo.id}/download`)}
             download={photo.filename}
             className="flex-1 bg-flame py-2 text-center font-cond text-xs uppercase tracking-[0.2em] text-black"
           >
