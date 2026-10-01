@@ -9,16 +9,14 @@ RUN npm ci || npm install
 COPY frontend/ ./
 RUN npm run build
 
-# ---- python wheels (dlib compiles here; see backend/Dockerfile) ----
-FROM python:3.11 AS wheels
-RUN pip install --no-cache-dir cmake
-COPY backend/requirements.txt .
-RUN pip wheel --no-cache-dir -r requirements.txt -w /wheels
-
 # ---- runtime ----
-FROM python:3.11-slim
-COPY --from=wheels /wheels /wheels
-RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+# Full python image: it has the toolchain dlib compiles with and the X11/image
+# libraries dlib links against at runtime (see backend/Dockerfile).
+FROM python:3.11
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir cmake \
+ && pip install --no-cache-dir -r /tmp/requirements.txt \
+ && pip uninstall -y cmake
 
 WORKDIR /app/backend
 COPY backend/app ./app

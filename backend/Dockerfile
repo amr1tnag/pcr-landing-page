@@ -1,20 +1,18 @@
 # API-only image for hosts like Render (the frontend lives on Vercel).
-
-# ---- build: compile dlib once into wheels ----
-# dlib (under face_recognition) has no prebuilt Linux wheel. The full python image
-# already has a C++ toolchain and cmake comes from PyPI, so no apt step is needed.
+#
+# dlib (under face_recognition) has no prebuilt Linux wheel, so it compiles here.
+# The full python image already has a C++ toolchain plus the X11/image libraries
+# dlib links against at runtime, and cmake comes from PyPI, so no apt step is
+# needed. (A slim runtime image fails with "libX11.so.6: cannot open shared object".)
 # dlib's setup.py sizes its parallel build to available RAM, so it won't OOM.
-FROM python:3.11 AS build
-RUN pip install --no-cache-dir cmake
-COPY requirements.txt .
-RUN pip wheel --no-cache-dir -r requirements.txt -w /wheels
-
-# ---- runtime: slim image, prebuilt wheels only ----
-FROM python:3.11-slim
-COPY --from=build /wheels /wheels
-RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+FROM python:3.11
 
 WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir cmake \
+ && pip install --no-cache-dir -r requirements.txt \
+ && pip uninstall -y cmake
+
 COPY app ./app
 
 ENV PCR_PHOTOS_DIR=/data/photos \
